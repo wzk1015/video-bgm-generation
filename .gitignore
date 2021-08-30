@@ -1,0 +1,5 @@
+/lpd_dataset/*.npz
+/src/video2npz/VisBeatAssets/
+.DS_Store
+__pycache__/
+*.pt
