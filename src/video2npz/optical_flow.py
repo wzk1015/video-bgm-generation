@@ -12,9 +12,9 @@ def makedirs(dirs: list):
 		if not os.path.exists(dir):
 			os.makedirs(dir)
 
-video_dir = './video_360p'
-flow_dir = os.path.join(video_dir, 'flow')
-fig_dir = os.path.join(video_dir, 'fig')
+video_dir = '../../videos/'
+flow_dir = 'flow/'
+fig_dir = 'fig/'
 makedirs([video_dir, flow_dir, fig_dir])
 
 TIME_PER_BAR = 2  # 暂定2s一小节
@@ -29,7 +29,7 @@ THICKNESS = 2
 
 def dense_optical_flow(method, video_path, params=[], to_gray=False):
 #	print(video_path)
-#	assert os.path.exists(video_path)
+	assert os.path.exists(video_path)
 	metadata = skvideo.io.ffprobe(video_path)
 	print(metadata)
 	frame, time = metadata['video']['@avg_frame_rate'].split('/')
@@ -116,7 +116,8 @@ def dense_optical_flow(method, video_path, params=[], to_gray=False):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument("--method", choices=["farneback", "lucaskanade_dense", "rlof"], required=True)
+	parser.add_argument("--method", choices=["farneback", "lucaskanade_dense", "rlof"], default="farneback")
+	parser.add_argument("--video", default="../../videos/chongqing.mp4")
 	args = parser.parse_args()
 
 	flow = []
@@ -127,7 +128,7 @@ if __name__ == '__main__':
 	# 	print('Processing %d/%d: %s' % (i, len(os.listdir(video_dir)[:]), os.path.join(video_dir, video_path)))
 #		if '.mp4' in video_path:
 		if True:
-			video_path = "../../videos/chongqing.mp41"
+			video_path = args.video
 			print("video_path", video_path)
 			if args.method == 'lucaskanade_dense':
 				method = cv2.optflow.calcOpticalFlowSparseToDense

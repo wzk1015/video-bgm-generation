@@ -8,25 +8,19 @@ Unofficial code, by wzk
 
 ## Python Environments
 
+### FFMPEG
+
+`conda install ffmpeg=4.2 -c conda-forge`
+
 ### Python 3
 
-* install dependencies according to `py3_requirements.txt` **#TODO**
+install dependencies according to `py3_requirements.txt` **#TODO**
 
 ### Python 2 (for extracting visbeat)
 
-* `conda install ffmpeg=4.2 -c conda-forge`
+install dependencies according to `py2_requirements.txt` 
 
-* install dependencies according to `py2_requirements.txt` **#TODO**
-
-*  An error of `llvmlite` may appear when installing other packages (e.g.`visbeat`). If so, run the following lines instead
-
-  ```
-  pip install visbeat
-  pip install llvmlite==0.20.0
-  pip install visbeat --no-deps
-  ```
-
-* open `visbeat` package directory, change `estimate_tempo` in line 244 of `Video_CV.py` to `beat_track`
+open `visbeat` package directory, change `estimate_tempo` in line 244 of `Video_CV.py` to `beat_track`
 
 
 
@@ -71,7 +65,7 @@ Unofficial code, by wzk
 
 ## Training
 
-* convert training data from midi into npz **#TODO**
+* If you want to use another training set:  convert training data from midi into npz **#TODO**
 
   * ```shell
     python midi2numpy_mix.py --midi wzk/wzk_vlog_beat_enhance1_track1238.mid --visualize --video wzk.mp4
@@ -79,9 +73,9 @@ Unofficial code, by wzk
 
   * `--visualize` and `--video`: used to provide figures like Figure 2 in the paper. Put `metadata_v2.json` under the same directory first.
 
-* modify `path_train_data` in `train_encoder.py`
+  * modify `path_train_data` in `train_encoder.py`
 
-  * default: `lpd_5_ccdepr_mix_v4_10000.npz`
+    * default: `lpd_5_ccdepr_mix_v4_10000.npz`
 
 * run `python3 train_encoder.py -n XXX`, where XXX is the name of the experiment (will be the name of the log file & the checkpoints directory)
   
@@ -92,13 +86,16 @@ Unofficial code, by wzk
 
 ## Inference
 
-* convert video into npz **#TODO**
-  * run `python video2metadata.py --process_all --video_dir xxx/` to get file `metadata.json` (You should use a python2 environment)
-  * run `python metadata2numpy_mix.py --video_dir xxx/ --metadata xxx/metadata.json`  to get npz file
-* put npz under `inference/`
+* convert video into npz 
+  * extract flow magniture: `python optical_flow.py --video xxx.mp4`
+  * convert video into `metadata.json`:  `python video2metadata.py --video_name xxx/`  (You should use a **python2** environment)
+  * convert metadata into `.npz`: python metadata2numpy_mix.py --video_dir xxx/ --metadata xxx/metadata.json`
 * modify `path_saved_ckpt` in `gen_midi_conditional.py` 
   * default: pretrained `loss_13_params.pt`
-* run `python3 gen_midi_conditional.py`
+* run model to generate `.mid` : `python3 gen_midi_conditional.py`
+* convert midi into audio (e.g. `.m4a`): use GarageBand (recommended) or midi2audio 
+  * if using GarageBand, change tempo to the value of  `tempo` in `metadata.json` 
+* combine original video and audio into video with BGM: `ffmpeg -i 'xxx.mp4' -i 'yyy.m4a' -c:v copy -c:a aac -strict experimental -map 0:v:0 -map 1:a:0 'zzz.mp4`  to generate `zzz.mp4` as output
 
 
 

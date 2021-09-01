@@ -4,26 +4,10 @@ import os
 import math
 import time
 import glob
-import datetime
-import random
-import pickle
 import json
 import numpy as np
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
-import torch.optim as optim
-from torch.nn.utils import clip_grad_norm_
-from torch.utils.data import Dataset, DataLoader
-
-from fast_transformers.builders import TransformerEncoderBuilder
-from fast_transformers.builders import RecurrentEncoderBuilder
-from fast_transformers.masking import TriangularCausalMask
-
-import miditoolkit
-from miditoolkit.midi.containers import Marker, Instrument, TempoChange, Note
 
 import sys
 sys.path.append("../lpd_dataset/")
@@ -31,14 +15,10 @@ sys.path.append("../lpd_dataset/")
 from numpy2midi_mix import numpy2midi
 
 
-# MODE = 'train'
-MODE = 'inference'
-
 num_songs = 3
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '7'
 print("device", os.environ['CUDA_VISIBLE_DEVICES'])
-
 
 
 def generate():
@@ -99,30 +79,20 @@ def generate():
         # except:
         #     continue
 
-    print('ave token time:', sum(words_len_list) / sum(song_time_list))
-    print('ave song time:', np.mean(song_time_list))
-
-    runtime_result = {
-        'song_time': song_time_list,
-        'words_len_list': words_len_list,
-        'ave token time:': sum(words_len_list) / sum(song_time_list),
-        'ave song time': float(np.mean(song_time_list)),
-    }
-
-    with open('runtime_stats.json', 'w') as f:
-        json.dump(runtime_result, f)
+        # print('ave token time:', sum(words_len_list) / sum(song_time_list))
+        # print('ave song time:', np.mean(song_time_list))
+        #
+        # runtime_result = {
+        #     'song_time': song_time_list,
+        #     'words_len_list': words_len_list,
+        #     'ave token time:': sum(words_len_list) / sum(song_time_list),
+        #     'ave song time': float(np.mean(song_time_list)),
+        # }
+        #
+        # with open('runtime_stats.json', 'w') as f:
+        #     json.dump(runtime_result, f)
 
 
 if __name__ == '__main__':
-    if MODE == 'train':
-        print("training")
-        train()
-
-    # -- inference -- #
-    elif MODE == 'inference':
-        print("inference")
-        generate()
-
-    else:
-        print("gen with onsets")
-        gen_with_onsets(recurrent=False)
+    print("inference")
+    generate()

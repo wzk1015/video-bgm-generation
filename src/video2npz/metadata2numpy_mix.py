@@ -25,11 +25,11 @@ DIMENSION = {
 }
 N_DIMENSION = len(DIMENSION)
 
-with open('metadata_v2.json', 'r') as f:
-# with open('metadata_v2_vlog2.json', 'r') as f:
-# with open('metadata_v1.json', 'r') as f:
-# with open('metadata_v2.json', 'r') as f:
-    metadata_all = json.load(f)
+# with open('metadata.json', 'r') as f:
+# # with open('metadata_v2_vlog2.json', 'r') as f:
+# # with open('metadata_v1.json', 'r') as f:
+# # with open('metadata_v2.json', 'r') as f:
+#     metadata_all = json.load(f)
 
 
 def _cal_b_density(flow_magnitude):
@@ -62,32 +62,37 @@ def _get_bar_token(b_dens, i_beat, n_beat):
     l[0][DIMENSION['p_beat']] = round(i_beat / n_beat * 100) + 1
     return l
 
-def video2numpy(video_name):
-    assert video_name in metadata_all.keys()
-    metadata = metadata_all[video_name]
 
-    vbeats = metadata['vbeats']
-    fmpb = metadata['flow_magnitude_per_bar']
-    n_beat = int(math.ceil(float(metadata['duration']) / 60 * float(metadata['tempo']) * 4))
+# def video2numpy(video_name):
+#     # assert video_name in metadata_all.keys()
+#     # metadata = metadata_all[video_name]
+#
+#     with open('metadata.json', 'r') as f2:
+#         metadata = json.load(f2)
+#
+#     vbeats = metadata['vbeats']
+#     fmpb = metadata['flow_magnitude_per_bar']
+#     n_beat = int(math.ceil(float(metadata['duration']) / 60 * float(metadata['tempo']) * 4))
+#
+#     n_bars = 0  # 已添加 bar token 个数
+#     l = []
+#     for vbeat in vbeats:
+#         # add bar token
+#         while int(vbeat['bar']) >= n_bars:
+#             i_beat = n_bars * RESOLUTION
+#             l += _get_bar_token(b_dens=_cal_b_density(fmpb[n_bars]), i_beat=i_beat, n_beat=n_beat)
+#             n_bars += 1
+#         # add beat token
+#         i_beat = int(vbeat['bar']) * RESOLUTION + int(vbeat['tick'])
+#         l += _get_beat_token(beat=int(vbeat['tick']), o_dens=_cal_o_density(vbeat['weight']), i_beat=i_beat, n_beat=n_beat)
+#     # add empty bars
+#     while n_bars < len(fmpb):
+#         i_beat = n_bars * RESOLUTION
+#         l += _get_bar_token(b_dens=_cal_b_density(fmpb[n_bars]), i_beat=i_beat, n_beat=n_beat)
+#         n_bars += 1
+#
+#     return np.asarray(l, dtype=int)
 
-    n_bars = 0  # 已添加 bar token 个数
-    l = []
-    for vbeat in vbeats:
-        # add bar token
-        while int(vbeat['bar']) >= n_bars:
-            i_beat = n_bars * RESOLUTION
-            l += _get_bar_token(b_dens=_cal_b_density(fmpb[n_bars]), i_beat=i_beat, n_beat=n_beat)
-            n_bars += 1
-        # add beat token
-        i_beat = int(vbeat['bar']) * RESOLUTION + int(vbeat['tick']) 
-        l += _get_beat_token(beat=int(vbeat['tick']), o_dens=_cal_o_density(vbeat['weight']), i_beat=i_beat, n_beat=n_beat)
-    # add empty bars
-    while n_bars < len(fmpb):
-        i_beat = n_bars * RESOLUTION
-        l += _get_bar_token(b_dens=_cal_b_density(fmpb[n_bars]), i_beat=i_beat, n_beat=n_beat)
-        n_bars += 1
-    
-    return np.asarray(l, dtype=int)
 
 def metadata2numpy(metadata):
     vbeats = metadata['vbeats']
@@ -116,34 +121,33 @@ def metadata2numpy(metadata):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--video_dir')
-    parser.add_argument('--metadata')
+    parser.add_argument('--out_dir', default="../../inference/")
+    parser.add_argument('--video_name', default="chongqing.mp4")
+    parser.add_argument('--metadata', default="metadata.json")
     args = parser.parse_args()
 
-    video_dir = args.video_dir
+    video_name = args.video_name
+
     with open(args.metadata) as f:
         metadata = json.load(f)
-    # video_dir = 'video_360p'
-    if not os.path.exists(os.path.join(video_dir, 'npz')):
-        os.makedirs(os.path.join(video_dir, 'npz'))
 
-    for video_name in os.listdir(video_dir):
-        target_path = os.path.join(video_dir, 'npz', video_name.replace('.mp4', '.npz'))
-        if '.mp4' in video_name: # and not os.path.exists(target_path):
-            # try:
-            assert video_name in metadata.keys()
-            print('processing to save to %s' % target_path)
-            # input_numpy = video2numpy(video_name)
-            input_numpy = metadata2numpy(metadata[video_name])
-            np.savez(target_path, input=input_numpy)
-            # except Exception as e:
-                # print(e, video_name)
+    target_path = os.path.join(args.out_dir, video_name.replace('.mp4', '.npz'))
+
+    print('processing to save to %s' % target_path)
+    input_numpy = metadata2numpy(metadata)
+    np.savez(target_path, input=input_numpy)
+    print("saved to", target_path)
+
+    # for video_name in os.listdir(args.video_dir):
+    #     target_path = os.path.join(vargs.video_dir, 'npz', video_name.replace('.mp4', '.npz'))
+    #     if '.mp4' in video_name: # and not os.path.exists(target_path):
+    #         # try:
+    #         assert video_name in metadata.keys()
+    #         print('processing to save to %s' % target_path)
+    #         # input_numpy = video2numpy(video_name)
+    #         input_numpy = metadata2numpy(metadata[video_name])
+    #         np.savez(target_path, input=input_numpy)
+    #         # except Exception as e:
+    #             # print(e, video_name)
 
 
-    # video_name = 'vlog_360p.mp4'
-    # video_name = '301216386-1-208.mp4'
-    # target_path = os.path.join(video_dir, 'npz', video_name.replace('.mp4', '') + '_v2.npz')
-    # if '.mp4' in video_name and not os.path.exists(target_path):
-    #     print('processing to save to %s' % target_path)
-    #     input_numpy = video2numpy(video_name)
-    #     np.savez(target_path, input=input_numpy)

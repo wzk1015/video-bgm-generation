@@ -61,7 +61,6 @@ def numpy2midi(name, decoder: np.ndarray) -> muspy.Music:
     # out_path = os.path.join(restored_midi_dir, name + '.mid')
     # muspy.write_midi(out_path, muspy_music)
     muspy.write_midi(name + ".mid", muspy_music)
-    print(out_path)
 
     return muspy_music
 
