@@ -28,7 +28,10 @@ THICKNESS = 2
 
 
 def dense_optical_flow(method, video_path, params=[], to_gray=False):
+#	print(video_path)
+#	assert os.path.exists(video_path)
 	metadata = skvideo.io.ffprobe(video_path)
+	print(metadata)
 	frame, time = metadata['video']['@avg_frame_rate'].split('/')
 	fps = round(float(frame) / float(time))
 	if os.path.exists(os.path.join(flow_dir, video_path.split('/')[-1].split('.')[0] + '.npz')):
@@ -118,13 +121,14 @@ if __name__ == '__main__':
 
 	flow = []
 	if True:
-		video_path = 'vlog_360p.mp4'
+#		video_path = 'vlog_360p.mp4'
 	# for i, video_path in enumerate(os.listdir(video_dir)[:]):
 	# 	# try:
 	# 	print('Processing %d/%d: %s' % (i, len(os.listdir(video_dir)[:]), os.path.join(video_dir, video_path)))
-		if '.mp4' in video_path:
-			video_path = os.path.join(video_dir, video_path)
-
+#		if '.mp4' in video_path:
+		if True:
+			video_path = "../../videos/chongqing.mp41"
+			print("video_path", video_path)
 			if args.method == 'lucaskanade_dense':
 				method = cv2.optflow.calcOpticalFlowSparseToDense
 				optical_flow, flow_magnitude_list = dense_optical_flow(method, video_path, to_gray=True)

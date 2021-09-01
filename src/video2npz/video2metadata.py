@@ -71,6 +71,7 @@ def process_video(video_name, args):
 			vbeats_list.append(vbeat_dict)
 	print('%d / %d vbeats selected' % (len(vbeats_list), len(vbeats)))
 
+#	flow_magnitude_dir = os.path.join('VisBeatAssets/VideoSources', video_name, 'Data/Features/video/flow_magnitude')
 	flow_magnitude_dir = os.path.join('VisBeatAssets/VideoSources', video_name, 'Data/Features/video/flow_magnitude')
 	flow_magnitude_list = np.load(os.path.join(flow_magnitude_dir, os.listdir(flow_magnitude_dir)[0]), allow_pickle=True)['value']
 	fps = round(vlog.n_frames() / float(vlog.getDuration()))

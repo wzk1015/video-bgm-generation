@@ -14,6 +14,8 @@ Unofficial code, by wzk
 
 ### Python 2 (for extracting visbeat)
 
+* `conda install ffmpeg=4.2 -c conda-forge`
+
 * install dependencies according to `py2_requirements.txt` **#TODO**
 
 *  An error of `llvmlite` may appear when installing other packages (e.g.`visbeat`). If so, run the following lines instead
@@ -23,10 +25,10 @@ Unofficial code, by wzk
   pip install llvmlite==0.20.0
   pip install visbeat --no-deps
   ```
-  
-  
-  
-  
+
+* open `visbeat` package directory, change `estimate_tempo` in line 244 of `Video_CV.py` to `beat_track`
+
+
 
 
 
