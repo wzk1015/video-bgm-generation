@@ -11,18 +11,20 @@ import utils
 from utils import *
 from model_encoder import ModelForTraining
 
+from dictionary_mix import init_dictionary
 
 os.environ['CUDA_VISIBLE_DEVICES'] = "0,1,2,3"
 
 path_data_root = '../lpd_dataset/'
-path_train_data = os.path.join(path_data_root, 'lpd_5_ccdepr_mix_v4_10000.npz')
+# path_train_data = os.path.join(path_data_root, 'lpd_5_ccdepr_mix_v4_10000.npz')
+path_train_data = os.path.join(path_data_root, 'lpd_5_prcem_mix_v8_10000.npz')
 
 
 def train_dp():
     parser = argparse.ArgumentParser(description="Demo of argparse")
-    parser.add_argument('-n', '--name', required=True)
+    parser.add_argument('-n', '--name', default="debug")
     parser.add_argument('-l', '--lr', default=0.0001)
-    parser.add_argument('-b', '--batch_size', default=4)
+    parser.add_argument('-b', '--batch_size', default=1)
     parser.add_argument('-p', '--path')
     args = parser.parse_args()
 
@@ -31,15 +33,16 @@ def train_dp():
     DEBUG = args.name == "debug"
 
     params = {
-        "DECAY_EPOCH"   : [],
-        "DECAY_RATIO"   : 0.1,
+        "DECAY_EPOCH": [],
+        "DECAY_RATIO": 0.1,
     }
+
 
     log("name:", args.name)
     log("args", args)
 
     if DEBUG:
-        log("DEBUG MODE")
+        log("DEBUG MODE checkpoints will not be saved")
     else:
         utils.flog = open("../logs/" + args.name + ".log", "w")
 
@@ -47,24 +50,42 @@ def train_dp():
     n_epoch = 4000
     max_grad_norm = 3
 
-
     # config
-    train_data = np.load(path_train_data)
-    train_x = train_data['x'][:, :, [1, 0, 2, 3, 4, 5, 6]]
-    train_y = train_data['y'][:, :, [1, 0, 2, 3, 4, 5, 6]]
+    train_data = np.load(path_train_data, allow_pickle=True)
+    train_x = train_data['x'][:, :, [1, 0, 2, 3, 4, 5, 6, 9, 7]]
+    train_y = train_data['y'][:, :, [1, 0, 2, 3, 4, 5, 6, 9, 7]]
+    # train_x = train_data['x'][:, :, [1, 0, 2, 3, 4, 5, 6]]
+    # train_y = train_data['y'][:, :, [1, 0, 2, 3, 4, 5, 6]]
     train_mask = train_data['decoder_mask'][:, :9999]
+
+    metadata = train_data['metadata']
+    # import ipdb;ipdb.set_trace()
+    for i, m in enumerate(metadata):
+        total = m["de_len"] - 1
+        train_x[i, :total, 7] = train_x[i, :total, 7] + 1
+
+
+    init_token = np.zeros((train_x.shape[0], 7, 3), dtype=np.int32)
+    for i, x in enumerate(train_data['metadata']):
+        for j, k in enumerate(x["instruments"]):
+            init_token[i, j + 2, 2] = int(init_dictionary["instr_type"][k])
+        init_token[i, 0, 0] = int(init_dictionary["genre"][x["genre"]])
+        # init_token[i, 1, 1] = int(init_dictionary["key"][x["key"]])
+
     num_batch = len(train_x) // batch_size
-    
+
+
     # create saver
     saver_agent = Saver(exp_dir="../exp/" + args.name, debug=DEBUG)
 
     decoder_n_class = np.max(train_x, axis=(0, 1)) + 1
+    init_n_class = np.max(init_token, axis=(0, 1)) + 1
     # log
-    log('num of encoder classes:', decoder_n_class)
+    log('num of encoder classes:', decoder_n_class, init_n_class)
 
     # init
 
-    net = torch.nn.DataParallel(ModelForTraining(decoder_n_class))
+    net = torch.nn.DataParallel(ModelForTraining(decoder_n_class, init_n_class))
 
     if torch.cuda.is_available():
         net.cuda()
@@ -117,20 +138,23 @@ def train_dp():
             batch_x = train_x[bidx_st:bidx_ed]
             batch_y = train_y[bidx_st:bidx_ed]
             batch_mask = train_mask[bidx_st:bidx_ed]
+            batch_init = init_token[bidx_st:bidx_ed]
 
             # to tensor
             batch_x = torch.from_numpy(batch_x).long()
             batch_y = torch.from_numpy(batch_y).long()
             batch_mask = torch.from_numpy(batch_mask).float()
+            batch_init = torch.from_numpy(batch_init).long()
 
             if torch.cuda.is_available():
                 batch_x = batch_x.cuda()
                 batch_y = batch_y.cuda()
                 batch_mask = batch_mask.cuda()
+                batch_init = batch_init.cuda()
 
             # run
-            losses = net(batch_x, batch_y, batch_mask)
-            losses = [l.sum()/DEVICE_COUNT for l in losses]
+            losses = net(batch_x, batch_y, batch_mask, batch_init)
+            losses = [l.sum() / DEVICE_COUNT for l in losses]
             loss = (losses[0] + losses[1] + losses[2] + losses[3] + losses[4] + losses[5] + losses[6]) / 7
 
             # Update
@@ -141,8 +165,10 @@ def train_dp():
             optimizer.step()
 
             # print
-            sys.stdout.write('{}/{} | Loss: {:.3f} | barbeat {:.3f}, type {:.3f}, pitch {:.3f}, duration {:.3f}, instr {:.3f}, o_den {:.3f}, b_den {:.3f}\r'.format(
-                bidx, num_batch, float(loss), losses[0], losses[1], losses[2], losses[3], losses[4], losses[5], losses[6]))
+            sys.stdout.write(
+                '{}/{} | Loss: {:.3f} | barbeat {:.3f}, type {:.3f}, pitch {:.3f}, duration {:.3f}, instr {:.3f}, o_den {:.3f}, b_den {:.3f}\r'.format(
+                    bidx, num_batch, float(loss), losses[0], losses[1], losses[2], losses[3], losses[4], losses[5],
+                    losses[6]))
             sys.stdout.flush()
 
             # acc

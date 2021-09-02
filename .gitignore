@@ -4,3 +4,4 @@
 __pycache__/
 *.pt
 .idea/
+/new/

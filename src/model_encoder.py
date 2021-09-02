@@ -1,4 +1,5 @@
 from utils import *
+import numpy as np
 
 from fast_transformers.builders import TransformerEncoderBuilder, TransformerDecoderBuilder
 from fast_transformers.masking import TriangularCausalMask, FullMask
@@ -15,6 +16,7 @@ N_HEAD = 8
 
 ATTN_DECODER = "causal-linear"
 
+
 ################################################################################
 # Sampling
 ################################################################################
@@ -25,7 +27,7 @@ def softmax_with_temperature(logits, temperature):
 
 
 def weighted_sampling(probs):
-    probs /= (sum(probs)+ 1e-10)
+    probs /= (sum(probs) + 1e-10)
     sorted_probs = np.sort(probs)[::-1]
     sorted_index = np.argsort(probs)[::-1]
     try:
@@ -64,9 +66,8 @@ def sampling(logit, p=None, t=1.0):
     return cur_word
 
 
-
 class BaseModel(nn.Module):
-    def __init__(self, n_token, is_training=True):
+    def __init__(self, n_token, init_n_token):
         super(BaseModel, self).__init__()
 
         print("D_MODEL", D_MODEL, " N_LAYER", N_LAYER_ENCODER, " N_HEAD", N_HEAD, "DECODER ATTN", ATTN_DECODER)
@@ -82,9 +83,18 @@ class BaseModel(nn.Module):
         self.loss_func = nn.CrossEntropyLoss(reduction='none')
         self.emb_sizes = [64, 32, 64, 512, 128, 32, 64]
 
+        self.init_n_token = init_n_token  # genre, key, instrument
+        self.init_emb_sizes = [64, 64, 64]
+        self.time_encoding_size = 256
+
         # --- modules config --- #
         # embeddings
         print('>>>>>:', self.n_token)
+
+        self.init_emb_genre = Embeddings(self.init_n_token[0], self.init_emb_sizes[0])
+        self.init_emb_key = Embeddings(self.init_n_token[1], self.init_emb_sizes[1])
+        self.init_emb_instrument = Embeddings(self.init_n_token[2], self.init_emb_sizes[2])
+        self.init_in_linear = nn.Linear(int(np.sum(self.init_emb_sizes)), self.d_model)
 
         self.encoder_emb_barbeat = Embeddings(self.n_token[0], self.emb_sizes[0])
         self.encoder_emb_type = Embeddings(self.n_token[1], self.emb_sizes[1])
@@ -93,13 +103,15 @@ class BaseModel(nn.Module):
         self.encoder_emb_duration = Embeddings(self.n_token[4], self.emb_sizes[4])
         self.encoder_emb_instr = Embeddings(self.n_token[5], self.emb_sizes[5])
         self.encoder_emb_onset_density = Embeddings(self.n_token[6], self.emb_sizes[6])
-        self.encoder_pos_emb = PositionalEncoding(self.d_model, self.dropout)
+        self.encoder_pos_emb = BeatPositionalEncoding(self.d_model, self.dropout)
+
+        self.encoder_emb_time_encoding = Embeddings(self.n_token[7], self.time_encoding_size)
 
         # # linear
         self.encoder_in_linear = nn.Linear(int(np.sum(self.emb_sizes)), self.d_model)
 
+        self.encoder_time_linear = nn.Linear(int(self.time_encoding_size), self.d_model)
 
-        print(' [o] using RNN backend.')
         self.transformer_encoder = self.get_encoder_builder().from_kwargs(
             n_layers=self.n_layer_encoder,
             n_heads=self.n_head,
@@ -135,8 +147,34 @@ class BaseModel(nn.Module):
         loss = torch.sum(loss) / torch.sum(loss_mask)
         return loss
 
+    def forward_init_token_vis(self, x, memory=None, is_training=True):
+        # import ipdb;ipdb.set_trace()
+        emb_genre = self.init_emb_genre(x[..., 0])
+        emb_key = self.init_emb_key(x[..., 1])
+        emb_instrument = self.init_emb_instrument(x[..., 2])
+        return emb_genre, emb_key, emb_instrument
 
-    def forward_hidden(self, x, memory=None, is_training=True):
+    def forward_init_token(self, x, memory=None, is_training=True):
+        # import ipdb;ipdb.set_trace()
+        emb_genre = self.init_emb_genre(x[..., 0])
+        emb_key = self.init_emb_key(x[..., 1])
+        emb_instrument = self.init_emb_instrument(x[..., 2])
+        embs = torch.cat(
+            [
+                emb_genre,
+                emb_key,
+                emb_instrument,
+            ], dim=-1)
+        encoder_emb_linear = self.init_in_linear(embs)
+        if is_training:
+            return encoder_emb_linear
+        else:
+            pos_emb = encoder_emb_linear.squeeze(0)
+            h, memory = self.transformer_encoder(pos_emb, memory=memory)
+            y_type = self.proj_type(h)
+            return h, y_type, memory
+
+    def forward_hidden(self, x, is_training=True, init_token=None):
         # linear transformer: b, s, f   x.shape=(bs, nf)
 
         # embeddings
@@ -147,6 +185,8 @@ class BaseModel(nn.Module):
         emb_duration = self.encoder_emb_duration(x[..., 4])
         emb_instr = self.encoder_emb_instr(x[..., 5])
         emb_onset_density = self.encoder_emb_onset_density(x[..., 6])
+
+        emb_time_encoding = self.encoder_emb_time_encoding(x[..., 7])
 
         embs = torch.cat(
             [
@@ -160,25 +200,40 @@ class BaseModel(nn.Module):
             ], dim=-1)
 
         encoder_emb_linear = self.encoder_in_linear(embs)
-        encoder_pos_emb = self.encoder_pos_emb(encoder_emb_linear)
+        encoder_emb_time_linear = self.encoder_time_linear(emb_time_encoding)
+        encoder_emb_linear = encoder_emb_linear + encoder_emb_time_linear
+        # batch size must equal to 1 TODO: change to batch size > 1
+        assert x.shape[0] == 1
+        encoder_pos_emb = self.encoder_pos_emb(encoder_emb_linear, x[0, :, 8])
 
         # transformer
         if is_training:
+            assert init_token is not None
+            init_emb_linear = self.forward_init_token(init_token)
+            encoder_pos_emb = torch.cat([init_emb_linear, encoder_pos_emb], dim=1)
+        else:
+            assert init_token is not None
+            init_emb_linear = self.forward_init_token(init_token)
+            encoder_pos_emb = torch.cat([init_emb_linear, encoder_pos_emb], dim=1)
+
+        if is_training:
             attn_mask = TriangularCausalMask(encoder_pos_emb.size(1), device=x.device)
             encoder_hidden = self.transformer_encoder(encoder_pos_emb, attn_mask)
-            # print("forward decoder done")
-            y_type = self.proj_type(encoder_hidden)
+            y_type = self.proj_type(encoder_hidden[:, 7:, :])
             return encoder_hidden, y_type
 
         else:
-            pos_emb = encoder_pos_emb.squeeze(0)
-            h, memory = self.transformer_encoder(pos_emb, memory=memory)
+            encoder_mask = TriangularCausalMask(encoder_pos_emb.size(1), device=x.device)
+            h = self.transformer_encoder(encoder_pos_emb, encoder_mask)  # y: s x d_model
+            h = h[:, -1:, :]
+            h = h.squeeze(0)
             y_type = self.proj_type(h)
-            return h, y_type, memory
+            return h, y_type
 
     def forward_output(self, h, y):
         # for training
         tf_skip_type = self.encoder_emb_type(y[..., 1])
+        h = h[:, 7:, :]
 
         # project other
         y_concat_type = torch.cat([h, tf_skip_type], dim=-1)
@@ -193,7 +248,6 @@ class BaseModel(nn.Module):
 
         return y_barbeat, y_pitch, y_duration, y_instr, y_onset_density, y_beat_density
 
-
     def forward_output_sampling(self, h, y_type, recurrent=True):
         '''
         for inference
@@ -201,12 +255,12 @@ class BaseModel(nn.Module):
         # sample type
         # print(y_type.shape)
         # exit(0)
-        y_type_logit = y_type[0, :] # dont know wtf
+        y_type_logit = y_type[0, :]  # dont know wtf
         cur_word_type = sampling(y_type_logit, p=0.90)
 
         type_word_t = torch.from_numpy(
             np.array([cur_word_type])).long().unsqueeze(0)
-        
+
         if torch.cuda.is_available():
             type_word_t = type_word_t.cuda()
 
@@ -248,18 +302,36 @@ class BaseModel(nn.Module):
         ])
         return next_arr
 
+    def inference_from_scratch(self, vlog=None, o_den_track_list=(1, 2, 3), pre_init=None, visualize=False, C=1.0):
+        if visualize:
+            pre_init_t = torch.from_numpy(pre_init).long().cuda()
+            emb_genre, emb_key, emb_instrument = self.forward_init_token_vis(pre_init_t)
+            return emb_genre, emb_key, emb_instrument
 
-    def inference_from_scratch(self, dictionary=None, condition=False, vlog=None, o_den_track_list=[1,2,3]):
-        classes = ['bar-beat', 'type', 'pitch', 'duration', 'instr_type']
-        import copy
-        dictionary = {'bar':17}
+        def get_p_beat(cur_bar, cur_beat, n_beat):
+            all_beat = cur_bar * 16 + cur_beat - 1
+            p_beat = round(all_beat / n_beat * 100) + 1
+            return p_beat
+
+        dictionary = {'bar': 17}
         if vlog is None:
+            pre_init = np.array([
+                [2, 0, 0],  # genre
+                [0, 1, 0],  # key
+                [0, 0, 1],
+                [0, 0, 2],
+                [0, 0, 3],
+                [0, 0, 0],
+                [0, 0, 0],
+            ])
             init = np.array([
                 [17, 1, 5, 0, 0, 0, 0],  # bar
             ])
         else:
+            assert pre_init is not None
+            pre_init = pre_init
             init = np.array([
-                [17, 1, vlog[0][1], 0, 0, 0, 0],  # bar
+                [17, 1, vlog[0][1], 0, 0, 0, 0, 1, 0],  # bar
             ])
 
         cnt_token = len(init)
@@ -270,96 +342,122 @@ class BaseModel(nn.Module):
 
             cnt_bar = 1
             init_t = torch.from_numpy(init).long()
+            pre_init = torch.from_numpy(pre_init).long().unsqueeze(0)
             if torch.cuda.is_available():
                 init_t = init_t.cuda()
+                pre_init = pre_init.cuda()
             print('------ initiate ------')
             for step in range(init.shape[0]):
                 input_ = init_t[step, :].unsqueeze(0).unsqueeze(0)
                 final_res.append(init[step, :][None, ...])
                 print(input_)
-                h, y_type, memory = self.forward_hidden(
-                    input_, memory, is_training=False)
+                h, y_type = self.forward_hidden(input_, is_training=False, init_token=pre_init)
 
-            if condition:
-                print('------- condition -------')
-                assert vlog is not None
-                len_vlog = len(vlog)
-                cur_vlog = 1
-                cur_track = 0
-                idx = 0
-                while (True):
+            print('------- condition -------')
+            assert vlog is not None
+            n_beat = vlog[0][4]
+            len_vlog = len(vlog)
+            cur_vlog = 1
+            cur_track = 0
+            idx = 0
+            acc_beat_num = vlog[0][1]
+            beat_num = {}
+            acc_note_num = 0
+            note_num = 0
+            err_note_number_list = []
+            err_beat_number_list = []
+            p_beat = 1
+            cur_bar = 0
+            while True:
+                replace = False
+                # sample others
+                print(idx, end="\r")
+                idx += 1
+                next_arr = self.forward_output_sampling(h, y_type)
+                if next_arr[1] == 1:
                     replace = False
-                    # sample others
-                    print(idx, end="\r")
-                    idx += 1
-                    next_arr = self.forward_output_sampling(h, y_type)
-                    if next_arr[1] == 2 and next_arr[5] == 0:
-                        next_arr[5] = 1
-                        print("warning note with instrument 0 detected, replaced by drum###################")
-                    if cur_vlog >= len_vlog:
-                        print("exceed vlog len")
-                        break
-                    vlog_i = vlog[cur_vlog]
-                    if vlog_i[0] == dictionary['bar'] and next_arr[0] == dictionary['bar']:
+                if next_arr[1] == 2 and next_arr[5] == 0:
+                    next_arr[5] = 1
+                    print("warning note with instrument 0 detected, replaced by drum###################")
+                if cur_vlog >= len_vlog:
+                    print("exceed vlog len")
+                    break
+                vlog_i = vlog[cur_vlog]
+                if vlog_i[0] == dictionary['bar'] and next_arr[0] == dictionary['bar']:
+                    err_beat_number = np.abs(len(beat_num.keys()) - acc_beat_num)
+                    err_beat_number_list.append(err_beat_number)
+                    flag = (np.random.rand() < C)
+                    print("replace beat density!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", vlog_i, next_arr)
+                    if flag:
                         next_arr = np.array([17, 1, vlog_i[1], 0, 0, 0, 0])
                         print("replace beat density!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", next_arr)
-                        cur_vlog += 1
-                    elif vlog_i[0] < dictionary['bar'] and next_arr[0] >= vlog_i[0]:
-                        print("replace onset density!!!!", vlog_i, next_arr)
-                        if cur_track == 0:
-                            cur_beat = next_arr[2]
-                        next_arr = np.array([vlog_i[0], 1, cur_beat, 0, 0, o_den_track_list[cur_track], vlog_i[2]+1])
+                        beat_num = {}
+                        acc_beat_num = vlog_i[1]
                         replace = True
+                        cur_vlog += 1
+                    else:
+                        print("replace denied!!!")
+                        cur_vlog += 1
+                elif vlog_i[0] < dictionary['bar'] and next_arr[0] >= vlog_i[0]:
+                    err_note_number = np.abs(acc_note_num - note_num)
+                    err_note_number_list.append(err_note_number)
+                    print("replace onset density!!!!", vlog_i, next_arr)
+                    if cur_track == 0:
+                        cur_density = next_arr[2]
+                        flag = (np.random.rand() < C)
+                        if next_arr[0] == dictionary['bar']:
+                            cur_density = 1
+                    if True:
+                        next_arr = np.array(
+                            [vlog_i[0], 1, cur_density, 0, 0, o_den_track_list[cur_track], vlog_i[2] + 0])
+                        replace = True
+                        acc_note_num = vlog_i[2] + 0
+                        note_num = 0
                         cur_track += 1
                         if cur_track >= len(o_den_track_list):
                             cur_track = 0
                             cur_vlog += 1
-                    final_res.append(next_arr[None, ...])
-                    print(next_arr)
-                    # forward
-                    input_ = torch.from_numpy(next_arr).long().unsqueeze(0).unsqueeze(0)
-                    if torch.cuda.is_available():
-                        input_ = input_.cuda()
-                    if replace:
-                        h, y_type, memory = self.forward_hidden(input_, memory, is_training=False)
                     else:
-                        h, y_type, memory = self.forward_hidden(input_, memory, is_training=False)
-                    if next_arr[1] == 0:
-                        print("EOS predicted")
-                        break
-                    # print(next_arr)
-                    if len(final_res) > 15000:
-                        print("exceed max len")
-                        break
-            else:
-                print('------ generate ------')
-                idx=0
-                while (True):
-                    # sample others
-                    print(idx, end="\r")
-                    idx += 1
-                    next_arr = self.forward_output_sampling(h, y_type)
-                    final_res.append(next_arr[None, ...])
-                    print(next_arr)
-                    # forward
-                    input_ = torch.from_numpy(next_arr).long().unsqueeze(0).unsqueeze(0)
-                    if torch.cuda.is_available():
-                        input_ = input_.cuda()
-                    h, y_type, memory = self.forward_hidden(input_, memory, is_training=False)
-                    if next_arr[1] == 0:
-                        print("EOS predicted")
-                        break
-                    if len(final_res) > 5000:
-                        print("exceed max len")
-                        break
+                        pass
+                        # print("replace denied!!!")
+                        # cur_vlog += 1
+                        # cur_track = 0
+                if next_arr[1] == 1:
+                    beat_num[next_arr[0]] = 1
+                elif next_arr[1] == 2 and replace == True:
+                    note_num += 1
 
+                if next_arr[0] == dictionary['bar']:
+                    cur_bar += 1
+                if next_arr[1] == 1:
+                    if next_arr[0] == 17:
+                        cur_beat = 1
+                    else:
+                        cur_beat = next_arr[0]
+                    p_beat = get_p_beat(cur_bar, cur_beat, n_beat)
+                if p_beat >= 102:
+                    print("exceed max p_beat!!!!")
+                    break
+                next_arr = np.concatenate([next_arr, [p_beat], [cur_bar * 16 + cur_beat - 1]])
+                final_res.append(next_arr[None, ...])
+                print(next_arr)
+                # forward
+                input_cur = torch.from_numpy(next_arr).long().unsqueeze(0).unsqueeze(0)
+                if torch.cuda.is_available():
+                    input_cur = input_cur.cuda()
+                input_ = torch.cat((input_, input_cur), dim=1)
+                if replace:
+                    h, y_type = self.forward_hidden(input_, is_training=False, init_token=pre_init)
+                else:
+                    h, y_type = self.forward_hidden(input_, is_training=False, init_token=pre_init)
+                if next_arr[1] == 0:
+                    print("EOS predicted")
+                    break
 
         print('\n--------[Done]--------')
         final_res = np.concatenate(final_res)
         print(final_res.shape)
-        return final_res
-
-    # def inference_from_scratch(self, dictionary):
+        return final_res, err_note_number_list, err_beat_number_list
 
 
 class ModelForTraining(BaseModel):
@@ -369,11 +467,9 @@ class ModelForTraining(BaseModel):
     def get_decoder_builder(self):
         return TransformerDecoderBuilder
 
-    def forward(self, x, target, loss_mask):
-        # encoder_hidden = self.forward_encoder(x)
-        # h, y_type = self.forward_decoder(x, memory=encoder_hidden, is_training=True)
-        h, y_type = self.forward_hidden(x, memory=None, is_training=True)
-        y_barbeat, y_pitch, y_duration, y_instr,  y_onset_density, y_beat_density = self.forward_output(h, target)
+    def forward(self, x, target, loss_mask, init_token):
+        h, y_type = self.forward_hidden(x, is_training=True, init_token=init_token)
+        y_barbeat, y_pitch, y_duration, y_instr, y_onset_density, y_beat_density = self.forward_output(h, target)
 
         # reshape (b, s, f) -> (b, f, s)
         y_barbeat = y_barbeat[:, ...].permute(0, 2, 1)
@@ -405,13 +501,11 @@ class ModelForTraining(BaseModel):
 
 class ModelForInference(BaseModel):
     def get_encoder_builder(self):
-        # return TransformerEncoderBuilder
-        return RecurrentEncoderBuilder
+        return TransformerEncoderBuilder
 
     def get_decoder_builder(self):
         return TransformerDecoderBuilder
-        # return RecurrentDecoderBuilder
 
-    def forward(self, dic, condition=False, vlog=None, o_den_track_list=[1,2,3]):
-        return self.inference_from_scratch(dic, condition=condition, vlog=vlog, o_den_track_list=o_den_track_list)
-
+    def forward(self, vlog=None, o_den_track_list=(1, 2, 3), pre_init=None, visualize=False, C=1.0):
+        return self.inference_from_scratch(vlog=vlog, o_den_track_list=o_den_track_list,
+                                           pre_init=pre_init, visualize=visualize, C=C)
