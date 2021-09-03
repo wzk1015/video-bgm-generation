@@ -59,6 +59,7 @@ def process_video(video_name, args):
     vbeats = vlog.getVisualBeatSequences(search_window=None)[0]
 
     tempo, beats = vlog.getVisualTempo()
+    print("Tempo is", tempo)
     vbeats_list = []
     for vbeat in vbeats:
         i_beat = round(vbeat.start / 60 * tempo * 4)
@@ -150,7 +151,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     # parser.add_argument('--process_all', action='store_true', help='Process the whole video dataset')
-    parser.add_argument('--video_name', type=str, default='chongqing.mp4')
+    parser.add_argument('--video_name', type=str, default='pku.mp4')
     parser.add_argument('--video_dir', type=str, default='../../videos/')
     parser.add_argument('--visualize', action='store_true')
     parser.add_argument('--resolution', type=int, default=1)

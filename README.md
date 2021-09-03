@@ -37,7 +37,7 @@ open `visbeat` package directory, change `estimate_tempo` in line 244 of `Video_
 
   * `utils.py`: some useful functions
   * `midi2numpy_mix_util.py`: convert midi into numpy array, used to produce training data
-  * `match.py`: calculate matchness between video and music (density and strength)
+  * `match.py`: calculate matchness between video and music from training set (density and strength) and select the closet one as output (see Equation 16 in the paper)
   * `metadata_v2.json`: an example of metadata extracted from each video, including duration, tempo, flow_magnitude_per_bar and visbeats.
   * `dictionary_mix.py`: a preset dictionary of compound word representation
 

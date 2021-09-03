@@ -26,7 +26,7 @@ def generate():
     # path
     from model_encoder import ModelForInference
     path_saved_ckpt = "../exp/loss_8_params.pt"
-    filelist = glob.glob("../inference/*.npz")
+    filelist = glob.glob("../inference/pku.npz")
     # outdir
 
     decoder_n_class = [18, 3, 18, 129, 18, 6, 20, 102, 4865]
@@ -50,6 +50,12 @@ def generate():
     if len(filelist) == 0:
         raise RuntimeError('no npz file in ' + filelist)
 
+    ###
+    genre = {
+        'Pop'       : 5,
+        'Rock'      : 6,
+    }
+
     for file_name in filelist:
         # gen
         start_time = time.time()
@@ -63,6 +69,7 @@ def generate():
 
             while sidx < num_songs:
                 try:
+                    print("new song")
                     start_time = time.time()
                     vlog_npz = np.load(file_name)['input']
                     pre_init = np.array([
