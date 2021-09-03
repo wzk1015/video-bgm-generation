@@ -2,15 +2,17 @@
 
 Unofficial code, by wzk
 
->  `ldp_encoder_baseline_mix_large_d_den` from 104 server
-
 
 
 ## Python Environments
 
 ### FFMPEG
 
-`conda install ffmpeg=4.2 -c conda-forge`
+```shell
+conda install ffmpeg=4.2 -c conda-forge
+```
+
+
 
 ### Python 3
 
@@ -18,7 +20,9 @@ install dependencies according to `py3_requirements.txt` **#TODO**
 
 ### Python 2 (for extracting visbeat)
 
-install dependencies according to `py2_requirements.txt` 
+```shell
+pip install -r py2_requirements.txt
+```
 
 open `visbeat` package directory, change `estimate_tempo` in line 244 of `Video_CV.py` to `beat_track`
 
@@ -49,7 +53,7 @@ open `visbeat` package directory, change `estimate_tempo` in line 244 of `Video_
 
 * `exp/`: checkpoints, named after val loss (e.g. loss_13_params.pt)
 
-* `inference_npz/`: processed video for inference, in the format of npz
+* `inference/`: processed video for inference, in the format of npz
 
 
 
@@ -57,9 +61,9 @@ open `visbeat` package directory, change `estimate_tempo` in line 244 of `Video_
 ## Preparation
 
 * clone this repo
-* download `lpd_5_ccdepr_mix_v4_10000.npz` and put it under `lpd_dataset/`
+* download `lpd_5_prcem_mix_v8_10000.npz` and put it under `lpd_dataset/`
 
-* download pretrained model `loss_13_params.pt` and put  it under `exp/`
+* download pretrained model `loss_8_params.pt` and put  it under `exp/`
 
 
 
@@ -67,35 +71,78 @@ open `visbeat` package directory, change `estimate_tempo` in line 244 of `Video_
 
 * If you want to use another training set:  convert training data from midi into npz **#TODO**
 
-  * ```shell
-    python midi2numpy_mix.py --midi wzk/wzk_vlog_beat_enhance1_track1238.mid --visualize --video wzk.mp4
-    ```
-
-  * `--visualize` and `--video`: used to provide figures like Figure 2 in the paper. Put `metadata_v2.json` under the same directory first.
-
-  * modify `path_train_data` in `train_encoder.py`
-
-    * default: `lpd_5_ccdepr_mix_v4_10000.npz`
-
-* run `python3 train_encoder.py -n XXX`, where XXX is the name of the experiment (will be the name of the log file & the checkpoints directory)
+  ```shell
+  python midi2numpy_mix.py --midi wzk/wzk_vlog_beat_enhance1_track1238.mid --visualize --video wzk.mp4
   
-  * if XXX is `debug`, checkpoints will not be saved
-  * change LR, batch size by adding arguments (see `parser` in `train_encoder.py`)
-  * change epochs or other model hyperparameters by modifying the source .py files
-  * continue training by adding `-p` argument to load model from given path
+  # --visualize and --video: used to provide figures like Figure 2 in the paper. Put metadata_v2.json under the same directory first.
+  ```
+
+  
+
+* train the model
+
+  ```shell
+  python train_encoder.py -n XXX
+  
+  # -n XXX: the name of the experiment, will be the name of the log file & the checkpoints directory. if XXX is 'debug', checkpoints will not be saved
+  # -l (--lr): initial learning rate
+  # -b (--batch_size): batch size
+  # -p (--path): if used, load model checkpoint from the given path
+  # -e (--epochs): number of epochs in training
+  # -t (--train_data): path of the training data (.npz file) 
+  # other model hyperparameters: modify the source .py files
+  ```
+
+
 
 ## Inference
 
 * convert video into npz 
-  * extract flow magniture: `python optical_flow.py --video xxx.mp4`
-  * convert video into `metadata.json`:  `python video2metadata.py --video_name xxx/`  (You should use a **python2** environment)
-  * convert metadata into `.npz`: python metadata2numpy_mix.py --video_dir xxx/ --metadata xxx/metadata.json`
-* modify `path_saved_ckpt` in `gen_midi_conditional.py` 
-  * default: pretrained `loss_13_params.pt`
-* run model to generate `.mid` : `python3 gen_midi_conditional.py`
+
+  ```shell
+  cd video2npz
+  
+  # extract flow magnitude into optical_flow/flow.npz
+  python optical_flow.py --video xxx.mp4
+  
+  # convert video into metadata.json with flow magnitude
+  # You should use a **Python2** environment
+  python video2metadata.py --video xxx.mp4
+  
+  # convert metadata into .npz under `inference/`
+  python metadata2numpy_mix.py --video xxx.mp4
+  ```
+
+  
+
+* run model to generate `.mid` : 
+
+  ```shell
+  python gen_midi_conditional.py -f "../inference/pku.npz" -c "../exp/loss_8_params.pt"
+  
+  # -c (--ckpt): checkpoints to be loaded
+  # -f (--files): input npz file
+  ```
+
+  
+
 * convert midi into audio (e.g. `.m4a`): use GarageBand (recommended) or midi2audio 
+
   * if using GarageBand, change tempo to the value of  `tempo` in `metadata.json` 
-* combine original video and audio into video with BGM: `ffmpeg -i 'xxx.mp4' -i 'yyy.m4a' -c:v copy -c:a aac -strict experimental -map 0:v:0 -map 1:a:0 'zzz.mp4`  to generate `zzz.mp4` as output
+
+  
+
+* combine original video and audio into video with BGM
+
+  ````shell
+  ffmpeg -i 'xxx.mp4' -i 'yyy.m4a' -c:v copy -c:a aac -strict experimental -map 0:v:0 -map 1:a:0 'zzz.mp4'
+  
+  # xxx.mp4: input video
+  # yyy.m4a: audio file generated in the previous step
+  # zzz.mp4: output video
+  ````
+
+  
 
 
 

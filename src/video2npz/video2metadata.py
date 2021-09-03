@@ -4,8 +4,6 @@ import matplotlib
 
 matplotlib.use('Agg')
 import visbeat as vb
-import pdb
-import math
 import os
 import os.path as osp
 import cv2
@@ -44,7 +42,7 @@ def process_all_videos(args):
         f.write(json_str)
 
 
-def process_video(video_name, args):
+def process_video(video_path, args):
     # figsize = (10, 4)
     figsize = (32, 4)
     dpi = 200
@@ -55,7 +53,8 @@ def process_video(video_name, args):
 
     vb.Video.getVisualTempo = vb.Video_CV.getVisualTempo
 
-    vlog = vb.PullVideo(name=video_name, source_location=osp.join(args.video_dir, video_name), max_height=360)
+    video = video_path.split(os.sep)[-1]
+    vlog = vb.PullVideo(name=video, source_location=osp.join(video_path), max_height=360)
     vbeats = vlog.getVisualBeatSequences(search_window=None)[0]
 
     tempo, beats = vlog.getVisualTempo()
@@ -75,7 +74,7 @@ def process_video(video_name, args):
 
     #	flow_magnitude_dir = os.path.join('VisBeatAssets/VideoSources', video_name, 'Data/Features/video/flow_magnitude')
     #	flow_magnitude_list = np.load(os.path.join(flow_magnitude_dir, os.listdir(flow_magnitude_dir)[0]), allow_pickle=True)['value']
-    npz = np.load("flow/" + video_name.replace('.mp4', '.npz'), allow_pickle=True)
+    npz = np.load("flow/" + video.replace('.mp4', '.npz'), allow_pickle=True)
     print(npz.keys())
     flow_magnitude_list = npz['flow']
     fps = round(vlog.n_frames() / float(vlog.getDuration()))
@@ -103,7 +102,7 @@ def process_video(video_name, args):
         thumbnails = [vlog.getFrameFromTime(t)[:, :int(height * 2.5 / 10), :] for t in list(frange(25, 35, 1))]
         thumbnails = np.concatenate(thumbnails, axis=1)
         cv2.cvtColor(thumbnails, cv2.COLOR_RGB2BGR)
-        cv2.imwrite(osp.join('image', video_name + '_thumbnails_1' + '.png'), thumbnails)
+        cv2.imwrite(osp.join('image', video + '_thumbnails_1' + '.png'), thumbnails)
 
         plt.rcParams.update({'font.size': 14})
         plt.figure(figsize=figsize, dpi=dpi)
@@ -130,12 +129,12 @@ def process_video(video_name, args):
         plt.ylabel('Optical Flow Magnitude')
         # plt.legend(loc = "best")
         plt.legend(loc="upper left")
-        plt.savefig(osp.join('image', video_name + '_flow' + '.eps'), format='eps', transparent=True)
-        plt.savefig(osp.join('image', video_name + '_flow' + '.png'), format='png', transparent=True)
+        plt.savefig(osp.join('image', video + '_flow' + '.eps'), format='eps', transparent=True)
+        plt.savefig(osp.join('image', video + '_flow' + '.png'), format='png', transparent=True)
 
         # Visbeats
         # vlog.printVisualBeatSequences(figsize=(10, 4), save_path=osp.join('image', video_name + '_visbeat' + '.eps'), xrange=(15, 35))
-        vlog.printVisualBeatSequences(figsize=figsize, save_path=osp.join('image', video_name + '_visbeat' + '.eps'),
+        vlog.printVisualBeatSequences(figsize=figsize, save_path=osp.join('image', video + '_visbeat' + '.eps'),
                                       xrange=xrange, x_major_locator=x_major_locator)
 
     return {
@@ -151,8 +150,8 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     # parser.add_argument('--process_all', action='store_true', help='Process the whole video dataset')
-    parser.add_argument('--video_name', type=str, default='pku.mp4')
-    parser.add_argument('--video_dir', type=str, default='../../videos/')
+    parser.add_argument('--video', type=str, default='../../videos/pku.mp4')
+    # parser.add_argument('--video_dir', type=str, default='../../videos/')
     parser.add_argument('--visualize', action='store_true')
     parser.add_argument('--resolution', type=int, default=1)
     args = parser.parse_args()
@@ -161,7 +160,7 @@ if __name__ == '__main__':
     # 	process_all_videos(args)
     # else:
 
-    metadata = process_video(args.video_name, args)
+    metadata = process_video(args.video, args)
     with open("metadata.json", "w") as f:
         json.dump(metadata, f)
     print("saved to metadata.json")

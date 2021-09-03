@@ -122,11 +122,11 @@ def metadata2numpy(metadata):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--out_dir', default="../../inference/")
-    parser.add_argument('--video_name', default="pku.mp4")
+    parser.add_argument('--video', default="pku.mp4")
     parser.add_argument('--metadata', default="metadata.json")
     args = parser.parse_args()
 
-    video_name = args.video_name
+    video_name = args.video
 
     with open(args.metadata) as f:
         metadata = json.load(f)

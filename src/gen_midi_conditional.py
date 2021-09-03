@@ -8,6 +8,7 @@ import json
 import numpy as np
 
 import torch
+import argparse
 
 import sys
 
@@ -25,8 +26,14 @@ print("device", os.environ['CUDA_VISIBLE_DEVICES'])
 def generate():
     # path
     from model_encoder import ModelForInference
-    path_saved_ckpt = "../exp/loss_8_params.pt"
-    filelist = glob.glob("../inference/pku.npz")
+
+    parser = argparse.ArgumentParser(description="Demo of argparse")
+    parser.add_argument('-c', '--ckpt', default="../exp/loss_8_params.pt")
+    parser.add_argument('-f', '--files', default="../inference/pku.npz")
+    args = parser.parse_args()
+
+    path_saved_ckpt = args.ckpt
+    filelist = glob.glob(args.files)
     # outdir
 
     decoder_n_class = [18, 3, 18, 129, 18, 6, 20, 102, 4865]

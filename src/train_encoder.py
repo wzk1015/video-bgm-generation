@@ -17,7 +17,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = "0,1,2,3"
 
 path_data_root = '../lpd_dataset/'
 # path_train_data = os.path.join(path_data_root, 'lpd_5_ccdepr_mix_v4_10000.npz')
-path_train_data = os.path.join(path_data_root, 'lpd_5_prcem_mix_v8_10000.npz')
+
 
 
 def train_dp():
@@ -26,7 +26,11 @@ def train_dp():
     parser.add_argument('-l', '--lr', default=0.0001)
     parser.add_argument('-b', '--batch_size', default=1)
     parser.add_argument('-p', '--path')
+    parser.add_argument('-e', '--epochs', default=4000)
+    parser.add_argument('-t', '--train_data', default='lpd_5_prcem_mix_v8_10000.npz')
     args = parser.parse_args()
+
+    path_train_data = os.path.join(path_data_root, args.train_data)
 
     init_lr = float(args.lr)
     batch_size = int(args.batch_size)
@@ -47,7 +51,7 @@ def train_dp():
         utils.flog = open("../logs/" + args.name + ".log", "w")
 
     # hyper params
-    n_epoch = 4000
+    n_epoch = args.epochs
     max_grad_norm = 3
 
     # config
