@@ -117,7 +117,7 @@ def dense_optical_flow(method, video_path, params=[], to_gray=False):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--method", choices=["farneback", "lucaskanade_dense", "rlof"], default="farneback")
-	parser.add_argument("--video", default="../../videos/pku.mp4")
+	parser.add_argument("--video", default="../../videos/vlog_short.mp4")
 	args = parser.parse_args()
 
 	flow = []

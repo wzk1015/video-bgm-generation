@@ -29,7 +29,7 @@ def generate():
 
     parser = argparse.ArgumentParser(description="Demo of argparse")
     parser.add_argument('-c', '--ckpt', default="../exp/loss_8_params.pt")
-    parser.add_argument('-f', '--files', default="../inference/pku.npz")
+    parser.add_argument('-f', '--files', default="../inference/vlog_short.npz")
     args = parser.parse_args()
 
     path_saved_ckpt = args.ckpt

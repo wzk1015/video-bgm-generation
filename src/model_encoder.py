@@ -25,6 +25,7 @@ ATTN_DECODER = "causal-linear"
 ################################################################################
 # -- temperature -- #
 def softmax_with_temperature(logits, temperature):
+    logits -= np.max(logits)
     probs = np.exp(logits / temperature) / np.sum(np.exp(logits / temperature))
     return probs
 

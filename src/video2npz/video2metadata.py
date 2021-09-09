@@ -150,7 +150,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     # parser.add_argument('--process_all', action='store_true', help='Process the whole video dataset')
-    parser.add_argument('--video', type=str, default='../../videos/pku.mp4')
+    parser.add_argument('--video', type=str, default='../../videos/vlog_short.mp4')
     # parser.add_argument('--video_dir', type=str, default='../../videos/')
     parser.add_argument('--visualize', action='store_true')
     parser.add_argument('--resolution', type=int, default=1)
