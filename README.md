@@ -24,7 +24,7 @@ install dependencies according to `py3_requirements.txt` **#TODO**
 pip install -r py2_requirements.txt
 ```
 
-open `visbeat` package directory, change `estimate_tempo` in line 244 of `Video_CV.py` to `beat_track`
+open `visbeat` package directory (e.g. `anaconda3/envs/xxx/lib/python2.7/site-packages/visbeat`), **replace the original `Video_CV.py` with `src/video2npz/Video_CV.py`**
 
 
 

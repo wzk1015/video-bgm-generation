@@ -16,6 +16,7 @@ from matplotlib.pyplot import MultipleLocator
 from stat_mix import _cal_b_density, _cal_o_density
 
 
+
 def makedirs(d):
     if not osp.exists(d):
         os.makedirs(d)
@@ -152,7 +153,7 @@ if __name__ == '__main__':
     # parser.add_argument('--process_all', action='store_true', help='Process the whole video dataset')
     parser.add_argument('--video', type=str, default='../../videos/vlog_short.mp4')
     # parser.add_argument('--video_dir', type=str, default='../../videos/')
-    parser.add_argument('--visualize', action='store_true')
+    parser.add_argument('--visualize', action='store_true', default=True)
     parser.add_argument('--resolution', type=int, default=1)
     args = parser.parse_args()
 
