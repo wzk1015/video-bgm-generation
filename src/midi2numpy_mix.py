@@ -2,11 +2,13 @@ import os
 import math
 import json
 import pdb
+import glob
 
 import muspy
 import h5py
 import numpy as np
 from tqdm import tqdm
+import argparse
 
 from dictionary_mix import preset_event2word, preset_word2event
 
@@ -55,10 +57,6 @@ with open('../lpd_dataset/tagtraum.json', 'r') as f:
     Folk           	33	    0.76%
     Blues          	19	    0.44%
     '''
-
-midi_dir = '/mnt/data3/brd/music_dataset/LPD/lpd_5/lpd_5_cleansed_midi/'
-h5_dir = '/mnt/data3/brd/music_dataset/LPD/lmd_matched_h5/'
-npz_dir = '/mnt/data3/brd/music_dataset/LPD/lpd_5/lpd_5_cleansed_npz/'
 
 
 class Note:
@@ -162,7 +160,7 @@ class MIDI:
         self.id = id
         self.midi = muspy.read_midi(os.path.join(midi_dir, id + '.mid'))
         self.midi.adjust_resolution(target=RESOLUTION//4)
-        self.genre = i2g[id]
+#        self.genre = i2g[id]
         # self.h5 = h5py.File(os.path.join(h5_dir, id + '.h5'), 'r')
 
         self.n_beat = self.midi.get_end_time()
@@ -198,8 +196,6 @@ class MIDI:
 
 
 def midi2numpy(id_list: list):
-    npz_filename = 'lpd_5_all_mix_v8_%d.npz' % DECODER_MAX_LEN
-    json_dir = '../lpd_dataset/json_mix_v8'
     if not os.path.exists(json_dir):
         os.makedirs(json_dir)
 
@@ -207,7 +203,8 @@ def midi2numpy(id_list: list):
     decoder_mask = []
     metadata_list = []
     decoder_len = []
-        
+    
+    
     for id in tqdm(id_list):
         id_filename = os.path.join(json_dir, id + '.json')
         if os.path.exists(id_filename):
@@ -219,6 +216,14 @@ def midi2numpy(id_list: list):
                 decoder_len.append(de_len)
                 metadata = load_dict['metadata']
         else:
+            
+    
+#    if True:
+#        for name in os.listdir(midi_dir):
+#            id = name.strip(".mid").strip(".midi")
+#            id_filename = os.path.join(json_dir, id + '.json')
+            
+            
             midi = MIDI(id)
             decoder_list, de_mask, de_len = midi.to_decoder_list()
             
@@ -230,7 +235,8 @@ def midi2numpy(id_list: list):
             decoder_list += [[0] * N_DECODER_DIMENSION] * (DECODER_MAX_LEN - de_len)
             de_mask += [0] * (DECODER_MAX_LEN - de_len)
 
-            metadata={'id': id, 'de_len': de_len, 'instruments': midi.instruments, 'genre': midi.genre}
+            metadata={'id': id, 'de_len': de_len, 'instruments': midi.instruments, 'genre': "N/A"} 
+            ##### genre set to empty
 
             dic = {'decoder_list': decoder_list, 'de_mask': de_mask, 'de_len': de_len, 'metadata': metadata}
             with open(id_filename, 'w') as f:
@@ -270,7 +276,7 @@ def midi2numpy(id_list: list):
     print('max decoder length: %d' % max(decoder_len))
     import matplotlib.pyplot as plt
     plt.hist(decoder_len)
-    plt.savefig('len.jpg')
+    plt.savefig('../lpd_dataset/len.jpg')
 
     decoder = np.asarray(decoder, dtype=int)
     x = decoder[:, :-1]
@@ -287,7 +293,18 @@ if __name__ == '__main__':
     # for filename in os.listdir('/mnt/data3/brd/music_dataset/LPD/lpd_5/lpd_5_cleansed_midi/'):
     #     if '.mid' in filename:
     #         id_list.append(filename[:-4])
-    id_list = []
-    for genre in ['Pop', 'Rock', 'Country', 'Electronic', 'Metal']:
-        id_list += g2i[genre]
-    midi2numpy(id_list[:10])
+#    id_list = []
+#    for genre in ['Pop', 'Rock', 'Country', 'Electronic', 'Metal']:
+#        id_list += g2i[genre]
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--midi_dir", default="../../lpd_5_cleansed_midi/")
+    args = parser.parse_args()
+    
+    midi_dir = args.midi_dir
+    npz_filename = '../lpd_dataset/lpd_5_all_mix_v9_%d.npz' % DECODER_MAX_LEN
+    json_dir = '../lpd_dataset/json_mix_v9'
+    
+    id_list = [name.strip(".mid").strip(".midi") for name in os.listdir(midi_dir) if ".mid" in name]
+    midi2numpy(id_list)
+    

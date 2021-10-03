@@ -1,4 +1,7 @@
+/src/*.jpg
+/src/*.npz
 /lpd_dataset/*.npz
+/lpd_dataset/json_*/
 /src/video2npz/VisBeatAssets/
 .DS_Store
 __pycache__/
