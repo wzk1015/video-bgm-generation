@@ -69,12 +69,10 @@ open `visbeat` package directory (e.g. `anaconda3/envs/xxx/lib/python2.7/site-pa
 
 ## Training
 
-* If you want to use another training set:  convert training data from midi into npz **#TODO**
+* If you want to use another training set:  convert training data from midi into npz
 
   ```shell
-  python midi2numpy_mix.py --midi wzk/wzk_vlog_beat_enhance1_track1238.mid --visualize --video wzk.mp4
-  
-  # --visualize and --video: used to provide figures like Figure 2 in the paper. Put metadata_v2.json under the same directory first.
+  python midi2numpy_mix.py --midi_dir /PATH/TO/MIDIS/ 
   ```
 
   
