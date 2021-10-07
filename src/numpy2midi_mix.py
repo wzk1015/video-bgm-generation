@@ -5,7 +5,7 @@ import json
 import muspy
 import numpy as np
 
-from midi2numpy_mix import Note, DECODER_DIMENSION, RESOLUTION, npz_dir
+from midi2numpy_mix import Note, DECODER_DIMENSION, RESOLUTION
 from dictionary_mix import preset_event2word, preset_word2event
 
 

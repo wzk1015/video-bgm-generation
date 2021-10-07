@@ -19,7 +19,7 @@ from dictionary_mix import genre
 
 num_songs = 3
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '7'
+os.environ['CUDA_VISIBLE_DEVICES'] = '4'
 print("device", os.environ['CUDA_VISIBLE_DEVICES'])
 
 
@@ -85,8 +85,9 @@ def generate():
     filelist = glob.glob(args.files)
     # outdir
 
-    decoder_n_class = [18, 3, 18, 129, 18, 6, 20, 102, 4865]
-    init_n_token = [7, 1, 6]
+    #TODO: this hard-coded n_class compared with n_class from train_encoder.py
+    decoder_n_class = [18, 3, 18, 129, 18, 6, 27, 102, 5025]
+    init_n_token = [1, 1, 1]
 
     # log
 
@@ -107,10 +108,11 @@ def generate():
         raise RuntimeError('no npz file in ' + filelist)
 
     ###
-    genre = {
-        'Pop'       : 5,
-        'Rock'      : 6,
-    }
+    #genre = {
+    #    'Pop'       : 5,
+    #    'Rock'      : 6,
+    #}
+    genre = {'no_genre': 0}
 
     for file_name in filelist:
         # gen
@@ -128,6 +130,7 @@ def generate():
                     print("new song")
                     start_time = time.time()
                     vlog_npz = np.load(file_name)['input']
+                    '''
                     pre_init = np.array([
                         [value, 0, 0],  # genre
                         [0, 0, 0],  # key
@@ -137,6 +140,8 @@ def generate():
                         [0, 0, 4],
                         [0, 0, 5],
                     ])
+                    '''
+                    pre_init = np.zeros((7, 3), dtype=np.int32)
 
                     C = 0.7
                     vlog_npz = vlog_npz[vlog_npz[:, 2] != 1]

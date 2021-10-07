@@ -1,8 +1,17 @@
+/logs/*.log
+/exp/*/
+/inference/*.npz
+/inference/*.mid
+!/inference/wzk.npz
+/src_no_pos/
 /src/*.jpg
 /src/*.npz
 /lpd_dataset/*.npz
 /lpd_dataset/json_*/
 /src/video2npz/VisBeatAssets/
+/src/video2npz/image/
+/src/video2npz/fig/*.jpg
+/src/video2npz/flow/*.npz
 .DS_Store
 __pycache__/
 *.pt

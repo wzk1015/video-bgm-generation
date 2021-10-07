@@ -13,24 +13,20 @@ from model_encoder import ModelForTraining
 
 from dictionary_mix import init_dictionary
 
-os.environ['CUDA_VISIBLE_DEVICES'] = "0,1,2,3"
-
-path_data_root = '../lpd_dataset/'
-# path_train_data = os.path.join(path_data_root, 'lpd_5_ccdepr_mix_v4_10000.npz')
-
+os.environ['CUDA_VISIBLE_DEVICES'] = "0,1,2,3,5,6"
 
 
 def train_dp():
     parser = argparse.ArgumentParser(description="Demo of argparse")
     parser.add_argument('-n', '--name', default="debug")
     parser.add_argument('-l', '--lr', default=0.0001)
-    parser.add_argument('-b', '--batch_size', default=1)
+    parser.add_argument('-b', '--batch_size', default=6)
     parser.add_argument('-p', '--path')
     parser.add_argument('-e', '--epochs', default=4000)
-    parser.add_argument('-t', '--train_data', default='lpd_5_prcem_mix_v8_10000.npz')
+    parser.add_argument('-t', '--train_data', default='../lpd_dataset/lpd_5_all_mix_v9_10000.npz')
     args = parser.parse_args()
 
-    path_train_data = os.path.join(path_data_root, args.train_data)
+    path_train_data = args.train_data
 
     init_lr = float(args.lr)
     batch_size = int(args.batch_size)
@@ -70,10 +66,10 @@ def train_dp():
 
 
     init_token = np.zeros((train_x.shape[0], 7, 3), dtype=np.int32)
-    for i, x in enumerate(train_data['metadata']):
-        for j, k in enumerate(x["instruments"]):
-            init_token[i, j + 2, 2] = int(init_dictionary["instr_type"][k])
-        init_token[i, 0, 0] = int(init_dictionary["genre"][x["genre"]])
+#    for i, x in enumerate(train_data['metadata']):
+#        for j, k in enumerate(x["instruments"]):
+#            init_token[i, j + 2, 2] = int(init_dictionary["instr_type"][k])
+#        init_token[i, 0, 0] = int(init_dictionary["genre"][x["genre"]])
         # init_token[i, 1, 1] = int(init_dictionary["key"][x["key"]])
 
     num_batch = len(train_x) // batch_size
@@ -82,6 +78,7 @@ def train_dp():
     # create saver
     saver_agent = Saver(exp_dir="../exp/" + args.name, debug=DEBUG)
 
+    # TODO
     decoder_n_class = np.max(train_x, axis=(0, 1)) + 1
     init_n_class = np.max(init_token, axis=(0, 1)) + 1
     # log

@@ -339,8 +339,8 @@ class BaseModel(nn.Module):
         dictionary = {'bar': 17}
         if vlog is None:
             pre_init = np.array([
-                [2, 0, 0],  # genre
-                [0, 1, 0],  # key
+            #    [2, 0, 0],  # genre
+            #    [0, 1, 0],  # key
                 [0, 0, 1],
                 [0, 0, 2],
                 [0, 0, 3],

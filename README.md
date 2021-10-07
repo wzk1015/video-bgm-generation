@@ -2,7 +2,13 @@
 
 Unofficial code, by wzk
 
+## TODO
 
+* fix `assert x.shape[0] == 1`
+
+* remove `i_beat` and `n_beat` 
+
+* `init_token` shape 
 
 ## Python Environments
 
@@ -97,18 +103,22 @@ open `visbeat` package directory (e.g. `anaconda3/envs/xxx/lib/python2.7/site-pa
 
 * convert video into npz 
 
+  put video under `../../videos`
+
   ```shell
   cd video2npz
   
   # extract flow magnitude into optical_flow/flow.npz
-  python optical_flow.py --video xxx.mp4
+  # use Python3 env
+  python optical_flow.py --video ../../videos/xxx.mp4
   
   # convert video into metadata.json with flow magnitude
-  # You should use a **Python2** environment
-  python video2metadata.py --video xxx.mp4
+  # use **Python2** env
+  python video2metadata.py --video ../../videos/xxx.mp4
   
   # convert metadata into .npz under `inference/`
-  python metadata2numpy_mix.py --video xxx.mp4
+  # use Python3 env
+  python metadata2numpy_mix.py --name xxx.mp4
   ```
 
   
@@ -116,7 +126,7 @@ open `visbeat` package directory (e.g. `anaconda3/envs/xxx/lib/python2.7/site-pa
 * run model to generate `.mid` : 
 
   ```shell
-  python gen_midi_conditional.py -f "../inference/pku.npz" -c "../exp/loss_8_params.pt"
+  python gen_midi_conditional.py -f "../inference/xxx.npz" -c "../exp/loss_8_params.pt"
   
   # -c (--ckpt): checkpoints to be loaded
   # -f (--files): input npz file
