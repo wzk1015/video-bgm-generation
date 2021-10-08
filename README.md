@@ -2,55 +2,25 @@
 
 Unofficial code, by wzk
 
+
+
 ## TODO
 
 * fix `assert x.shape[0] == 1`
 
 * remove `i_beat` and `n_beat` 
 
-* `init_token` shape 
-
-## Python Environments
-
-### FFMPEG
-
-```shell
-conda install ffmpeg=4.2 -c conda-forge
-```
-
-
-
-### Python 3
-
-install dependencies according to `py3_requirements.txt` **#TODO**
-
-### Python 2 (for extracting visbeat)
-
-```shell
-pip install -r py2_requirements.txt
-```
-
-open `visbeat` package directory (e.g. `anaconda3/envs/xxx/lib/python2.7/site-packages/visbeat`), **replace the original `Video_CV.py` with `src/video2npz/Video_CV.py`**
-
-
+* `init_token` shape (related to genre and instrument)
 
 
 
 ## Directory Structure
 
 * `src/`: code of the whole pipeline
-
   * `train_encoder.py`: training script, take a npz as input data to train the model 
   * `model_encoder.py`: code of the model
   * `gen_midi_conditional.py`: inference script, take several npzs (each represents a video) as input to generate several songs for each npz
-  * `numpy2midi_mix.py`: convert numpy array into midis, used by `gen_midi_conditional`
-
-  * `utils.py`: some useful functions
-  * `midi2numpy_mix_util.py`: convert midi into numpy array, used to produce training data
-  * `match.py`: calculate matchness between video and music from training set (density and strength) and select the closet one as output (see Equation 16 in the paper)
-  * `metadata_v2.json`: an example of metadata extracted from each video, including duration, tempo, flow_magnitude_per_bar and visbeats.
-  * `dictionary_mix.py`: a preset dictionary of compound word representation
-
+  
 * `src/video2npz/`: convert video into npz by extracting motion saliency and motion speed
 
 * `lpd_dataset/`: processed LPD dataset for training, in the format of npz
@@ -67,9 +37,31 @@ open `visbeat` package directory (e.g. `anaconda3/envs/xxx/lib/python2.7/site-pa
 ## Preparation
 
 * clone this repo
-* download `lpd_5_prcem_mix_v8_10000.npz` and put it under `lpd_dataset/`
+* download `lpd_5_prcem_mix_v8_10000.npz` and put it under `lpd_dataset/`  **#TODO**
 
-* download pretrained model `loss_8_params.pt` and put  it under `exp/`
+* download pretrained model `loss_8_params.pt` and put  it under `exp/` **#TODO**
+
+* install `ffmpeg`
+
+  ```shell
+  conda install ffmpeg=4.2 -c conda-forge
+  ```
+
+* prepare a Python3 conda environment  **#TODO**
+
+  * ```shell
+    conda create -n cmt_py3 python=3.7
+    pip install -r py3_requirements.txt
+    ```
+
+* prepare a Python2 conda environment (for extracting visbeat)
+
+  * ````shell
+    conda create -n cmt_py2 python=2.7
+    pip install -r py2_requirements.txt
+    ````
+
+  * open `visbeat` package directory (e.g. `anaconda3/envs/cmt_py2/lib/python2.7/site-packages/visbeat`), replace the original `Video_CV.py` with `src/video2npz/Video_CV.py`
 
 
 
@@ -101,28 +93,15 @@ open `visbeat` package directory (e.g. `anaconda3/envs/xxx/lib/python2.7/site-pa
 
 ## Inference
 
-* convert video into npz 
-
-  put video under `../../videos`
+* convert video into npz
 
   ```shell
-  cd video2npz
-  
-  # extract flow magnitude into optical_flow/flow.npz
-  # use Python3 env
-  python optical_flow.py --video ../../videos/xxx.mp4
-  
-  # convert video into metadata.json with flow magnitude
-  # use **Python2** env
-  python video2metadata.py --video ../../videos/xxx.mp4
-  
-  # convert metadata into .npz under `inference/`
-  # use Python3 env
-  python metadata2numpy_mix.py --name xxx.mp4
+  cd src/video2npz
+  sh inference.sh ../../videos/xxx.mp4
   ```
-
   
-
+  
+  
 * run model to generate `.mid` : 
 
   ```shell
