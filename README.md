@@ -1,6 +1,6 @@
 # CMT
 
-Unofficial code, by wzk
+code for paper Video Background Music Generation with Controllable Music Transformer (ACM MM 2021 Oral) [[arXiv]]() **#TODO**
 
 
 
