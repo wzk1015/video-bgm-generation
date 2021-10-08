@@ -9,9 +9,12 @@
 /lpd_dataset/*.npz
 /lpd_dataset/json_*/
 /src/video2npz/VisBeatAssets/
-/src/video2npz/image/
-/src/video2npz/fig/*.jpg
-/src/video2npz/flow/*.npz
+/src/video2npz/image/*
+/src/video2npz/examples/*
+/src/video2npz/fig/*
+/src/video2npz/flow/*
+/src/video2npz/optical_flow/*
+
 .DS_Store
 __pycache__/
 *.pt
@@ -19,3 +22,5 @@ __pycache__/
 /new/
 *.mp4
 *.m4a
+*.pyc
+cookies.txt
