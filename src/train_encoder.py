@@ -155,7 +155,7 @@ def train_dp():
 
             # run
             losses = net(batch_x, batch_y, batch_mask, batch_init)
-            losses = [l.sum() / DEVICE_COUNT for l in losses]
+            losses = [l.sum() for l in losses]
             loss = (losses[0] + losses[1] + losses[2] + losses[3] + losses[4] + losses[5] + losses[6]) / 7
 
             # Update
