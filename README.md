@@ -1,16 +1,8 @@
 # CMT
 
-code for paper Video Background Music Generation with Controllable Music Transformer (ACM MM 2021 Oral) [[arXiv]]() **#TODO**
+code for paper Video Background Music Generation with Controllable Music Transformer (ACM MM 2021 Oral) [[Paper]](https://raw.githubusercontent.com/wzk1015/wzk1015.github.io/master/cmt/paper.pdf) [[Site]](https://wzk1015.github.io/cmt/)
 
 
-
-## TODO
-
-* fix `assert x.shape[0] == 1`
-
-* remove `i_beat` and `n_beat` 
-
-* `init_token` shape (related to genre and instrument)
 
 
 
