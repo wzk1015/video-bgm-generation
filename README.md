@@ -29,30 +29,32 @@ code for paper Video Background Music Generation with Controllable Music Transfo
 ## Preparation
 
 * clone this repo
-* download `lpd_5_prcem_mix_v8_10000.npz` and put it under `lpd_dataset/`  **#TODO**
+* download `lpd_5_prcem_mix_v8_10000.npz`  from [HERE](https://drive.google.com/file/d/1Ud2-GXEr4PbRDDe-FZJwzqqZrbbWFxM-/view?usp=sharing) and put it under `lpd_dataset/` 
 
-* download pretrained model `loss_8_params.pt` and put  it under `exp/` **#TODO**
+* download pretrained model `loss_8_params.pt` from [HERE](https://drive.google.com/file/d/1MWnwwAdOrjC31dSy8kfyxHwv35wK0pQh/view?usp=sharing) and put  it under `exp/` 
 
 * install `ffmpeg`
 
   ```shell
-  conda install ffmpeg=4.2 -c conda-forge
+  conda install ffmpeg=4.2
   ```
 
 * prepare a Python3 conda environment  **#TODO**
 
-  * ```shell
-    conda create -n cmt_py3 python=3.7
-    pip install -r py3_requirements.txt
-    ```
+  ```shell
+  conda create -n cmt_py3 python=3.7
+  conda activate cmt_py3
+  pip install -r py3_requirements.txt
+  ```
 
 * prepare a Python2 conda environment (for extracting visbeat)
 
   * ````shell
     conda create -n cmt_py2 python=2.7
+    conda activate cmt_py2
     pip install -r py2_requirements.txt
     ````
-
+    
   * open `visbeat` package directory (e.g. `anaconda3/envs/cmt_py2/lib/python2.7/site-packages/visbeat`), replace the original `Video_CV.py` with `src/video2npz/Video_CV.py`
 
 

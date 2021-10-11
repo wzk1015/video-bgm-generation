@@ -298,12 +298,13 @@ if __name__ == '__main__':
 #        id_list += g2i[genre]
     
     parser = argparse.ArgumentParser()
-    parser.add_argument("--midi_dir", default="../../lpd_5_cleansed_midi/")
+    parser.add_argument("--midi_dir", default="../../lpd_5_cleansed_midi/", required=True)
+    parser.add_argument("--out_dir", default="../lpd_dataset/", required=True)
     args = parser.parse_args()
     
     midi_dir = args.midi_dir
-    npz_filename = '../lpd_dataset/lpd_5_all_mix_v9_%d.npz' % DECODER_MAX_LEN
-    json_dir = '../lpd_dataset/json_mix_v9'
+    npz_filename = os.path.join(args.out_dir, "data.npz")
+    json_dir = os.path.join(args.out_dir, 'json/')
     
     id_list = [name.strip(".mid").strip(".midi") for name in os.listdir(midi_dir) if ".mid" in name]
     midi2numpy(id_list)
