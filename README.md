@@ -9,12 +9,12 @@ code for paper Video Background Music Generation with Controllable Music Transfo
 ## Directory Structure
 
 * `src/`: code of the whole pipeline
-  * `train_encoder.py`: training script, take a npz as input data to train the model 
+  * `train_encoder.py`: training script, take a npz as input music data to train the model 
   * `model_encoder.py`: code of the model
-  * `gen_midi_conditional.py`: inference script, take several npzs (each represents a video) as input to generate several songs for each npz
+  * `gen_midi_conditional.py`: inference script, take a npz (represents a video) as input to generate several songs
   
-* `src/video2npz/`: convert video into npz by extracting motion saliency and motion speed
-
+  * `src/video2npz/`: convert video into npz by extracting motion saliency and motion speed
+  
 * `lpd_dataset/`: processed LPD dataset for training, in the format of npz
 
 * `logs/`: logs that automatically generate during training, can be used to track training status
@@ -61,10 +61,10 @@ code for paper Video Background Music Generation with Controllable Music Transfo
 
 ## Training
 
-* If you want to use another training set:  convert training data from midi into npz
+* If you want to use another training set:  convert training data from midi into npz under `lpd_dataset/`
 
   ```shell
-  python midi2numpy_mix.py --midi_dir /PATH/TO/MIDIS/ 
+  python midi2numpy_mix.py --midi_dir /PATH/TO/MIDIS/ --out_name data.npz 
   ```
 
   
@@ -72,7 +72,7 @@ code for paper Video Background Music Generation with Controllable Music Transfo
 * train the model
 
   ```shell
-  python train_encoder.py -n XXX
+  python train_encoder.py -n XXX -g 0 1 2 3
   
   # -n XXX: the name of the experiment, will be the name of the log file & the checkpoints directory. if XXX is 'debug', checkpoints will not be saved
   # -l (--lr): initial learning rate
@@ -80,6 +80,7 @@ code for paper Video Background Music Generation with Controllable Music Transfo
   # -p (--path): if used, load model checkpoint from the given path
   # -e (--epochs): number of epochs in training
   # -t (--train_data): path of the training data (.npz file) 
+  # -g (--gpus): ids of gpu
   # other model hyperparameters: modify the source .py files
   ```
 
@@ -91,7 +92,18 @@ code for paper Video Background Music Generation with Controllable Music Transfo
 
   ```shell
   cd src/video2npz
-  sh inference.sh ../../videos/xxx.mp4
+  
+  # extract flow magnitude into optical_flow/flow.npz
+  conda activate cmt_py3
+  python optical_flow.py --video ../../videos/xxx.mp4
+  
+  # convert video into metadata.json with flow magnitude
+  conda activate cmt_py2
+  python video2metadata.py --video ../../videos/xxx.mp4
+  
+  # convert metadata into .npz under `inference/`
+  conda activate cmt_py3
+  python metadata2numpy_mix.py --video ../../videos/xxx.mp4
   ```
   
   

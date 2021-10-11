@@ -299,12 +299,12 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--midi_dir", default="../../lpd_5_cleansed_midi/", required=True)
-    parser.add_argument("--out_dir", default="../lpd_dataset/", required=True)
+    parser.add_argument("--out_name", default="data.npz", required=True)
     args = parser.parse_args()
     
     midi_dir = args.midi_dir
-    npz_filename = os.path.join(args.out_dir, "data.npz")
-    json_dir = os.path.join(args.out_dir, 'json/')
+    npz_filename = os.path.join("../lpd_dataset/", args.out_name)
+    json_dir = os.path.join("../lpd_dataset/json/")
     
     id_list = [name.strip(".mid").strip(".midi") for name in os.listdir(midi_dir) if ".mid" in name]
     midi2numpy(id_list)

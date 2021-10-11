@@ -15,7 +15,8 @@ def makedirs(dirs: list):
 video_dir = '../../videos/'
 flow_dir = 'flow/'
 fig_dir = 'fig/'
-makedirs([video_dir, flow_dir, fig_dir])
+optical_flow_dir = 'optical_flow'
+makedirs([video_dir, flow_dir, fig_dir, optical_flow_dir])
 
 TIME_PER_BAR = 2  # 暂定2s一小节
 

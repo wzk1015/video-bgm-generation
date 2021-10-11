@@ -13,18 +13,21 @@ from model_encoder import ModelForTraining
 
 from dictionary_mix import init_dictionary
 
-os.environ['CUDA_VISIBLE_DEVICES'] = "0,1,2,3,5,6"
+
 
 
 def train_dp():
     parser = argparse.ArgumentParser(description="Demo of argparse")
     parser.add_argument('-n', '--name', default="debug")
     parser.add_argument('-l', '--lr', default=0.0001)
-    parser.add_argument('-b', '--batch_size', default=6)
+    parser.add_argument('-b', '--batch_size', default=torch.cuda.device_count())
     parser.add_argument('-p', '--path')
     parser.add_argument('-e', '--epochs', default=4000)
-    parser.add_argument('-t', '--train_data', default='../lpd_dataset/lpd_5_all_mix_v9_10000.npz')
+    parser.add_argument('-t', '--train_data', default='../lpd_dataset/lpd_5_prcem_mix_v8_10000.npz')
+    parser.add_argument('-g', '--gpus', type=int, nargs='+',default=list(range(torch.cuda.device_count())))
     args = parser.parse_args()
+    
+    os.environ['CUDA_VISIBLE_DEVICES'] = args.gpus
 
     path_train_data = args.train_data
 
@@ -78,9 +81,13 @@ def train_dp():
     # create saver
     saver_agent = Saver(exp_dir="../exp/" + args.name, debug=DEBUG)
 
-    # TODO
+#    # TODO
     decoder_n_class = np.max(train_x, axis=(0, 1)) + 1
     init_n_class = np.max(init_token, axis=(0, 1)) + 1
+    
+#    decoder_n_class = [18, 3, 18, 129, 18, 6, 20, 102, 5025]
+#    init_n_class = [7, 1, 6]
+    
     # log
     log('num of encoder classes:', decoder_n_class, init_n_class)
 
@@ -210,3 +217,4 @@ def train_dp():
 
 if __name__ == '__main__':
     train_dp()
+    

@@ -211,7 +211,7 @@ class BaseModel(nn.Module):
         encoder_emb_time_linear = self.encoder_time_linear(emb_time_encoding)
         encoder_emb_linear = encoder_emb_linear + encoder_emb_time_linear
         # batch size must equal to 1
-        assert x.shape[0] == 1
+        assert x.shape[0] == 1, "batch size on each device must be 1 (will be fixed later)" #TODO
         encoder_pos_emb = self.encoder_pos_emb(encoder_emb_linear, x[0, :, 8])
 
         if is_training:

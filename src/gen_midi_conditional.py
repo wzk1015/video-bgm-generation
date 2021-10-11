@@ -19,9 +19,6 @@ from dictionary_mix import genre
 
 num_songs = 3
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '4'
-print("device", os.environ['CUDA_VISIBLE_DEVICES'])
-
 
 def cal_control_error(err_note_number_list, err_beat_number_list):
     # number of notes per simu-note
@@ -78,16 +75,17 @@ def generate():
 
     parser = argparse.ArgumentParser(description="Demo of argparse")
     parser.add_argument('-c', '--ckpt', default="../exp/loss_8_params.pt")
-    parser.add_argument('-f', '--files', default="../inference/wzk.npz")
+    parser.add_argument('-f', '--files', required=True)
+    parser.add_argument('-g', '--gpus', type=int, nargs='+',default=list(range(torch.cuda.device_count())))
     args = parser.parse_args()
-
+    
+    os.environ['CUDA_VISIBLE_DEVICES'] = args.gpus
     path_saved_ckpt = args.ckpt
     filelist = glob.glob(args.files)
     # outdir
 
-    #TODO: this hard-coded n_class compared with n_class from train_encoder.py
-    decoder_n_class = [18, 3, 18, 129, 18, 6, 27, 102, 5025]
-    init_n_token = [1, 1, 1]
+    decoder_n_class = [18, 3, 18, 129, 18, 6, 20, 102, 5025]
+    init_n_token = [7, 1, 6]
 
     # log
 

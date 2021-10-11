@@ -1,6 +1,0 @@
- > params amount: 38,748,916
-batch loss | inf |          1 | 204.34892535209656
-batch loss | nan |          2 | 384.0991852283478
-batch loss | nan |          3 | 582.6665542125702
-batch loss | nan |          4 | 775.4906160831451
-batch loss | nan |          5 | 981.1941912174225

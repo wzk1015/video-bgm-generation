@@ -6,3 +6,6 @@ miditoolkit==0.1.15
 muspy==0.4.0
 scikit_learn==1.0
 torch==1.9.1
+pytorch-fast-transformers==0.4.0
+opencv-python==4.5.3.56
+scikit-vdeo==1.1.11
