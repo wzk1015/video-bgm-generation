@@ -39,7 +39,7 @@ code for paper Video Background Music Generation with Controllable Music Transfo
   conda install ffmpeg=4.2
   ```
 
-* prepare a Python3 conda environment  **#TODO**
+* prepare a Python3 conda environment
 
   ```shell
   conda create -n cmt_py3 python=3.7
@@ -66,8 +66,6 @@ code for paper Video Background Music Generation with Controllable Music Transfo
   ```shell
   python midi2numpy_mix.py --midi_dir /PATH/TO/MIDIS/ --out_name data.npz 
   ```
-
-  
 
 * train the model
 
@@ -117,7 +115,7 @@ code for paper Video Background Music Generation with Controllable Music Transfo
   # -f (--files): input npz file
   ```
 
-  
+  * if using another training set, change `decoder_n_class` in `gen_midi_conditional` to the `decoder_n_class` in `train_encoder.py`
 
 * convert midi into audio (e.g. `.m4a`): use GarageBand (recommended) or midi2audio 
 

@@ -81,7 +81,6 @@ def train_dp():
     # create saver
     saver_agent = Saver(exp_dir="../exp/" + args.name, debug=DEBUG)
 
-#    # TODO
     decoder_n_class = np.max(train_x, axis=(0, 1)) + 1
     init_n_class = np.max(init_token, axis=(0, 1)) + 1
     

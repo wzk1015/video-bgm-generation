@@ -113,7 +113,7 @@ class BeatPositionalEncoding(nn.Module):
 
     def forward(self, x, index):
         x = x + self.pe[:, index, :]
-        return self.dropout(x)
+        return self.dropout(x)[0]
 
 
 class Saver(object):
