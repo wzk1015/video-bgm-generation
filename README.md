@@ -119,7 +119,7 @@ code for paper Video Background Music Generation with Controllable Music Transfo
 
 * convert midi into audio (e.g. `.m4a`): use GarageBand (recommended) or midi2audio 
 
-  * if using GarageBand, change tempo to the value of  `tempo` in `metadata.json` 
+  * if using GarageBand, change tempo to the value of  `tempo` in `video2npz/metadata.json` 
 
   
 

@@ -20,19 +20,25 @@ def train_dp():
     parser = argparse.ArgumentParser(description="Demo of argparse")
     parser.add_argument('-n', '--name', default="debug")
     parser.add_argument('-l', '--lr', default=0.0001)
-    parser.add_argument('-b', '--batch_size', default=torch.cuda.device_count())
+    parser.add_argument('-b', '--batch_size')
     parser.add_argument('-p', '--path')
-    parser.add_argument('-e', '--epochs', default=4000)
+    parser.add_argument('-e', '--epochs', default=200)
     parser.add_argument('-t', '--train_data', default='../lpd_dataset/lpd_5_prcem_mix_v8_10000.npz')
     parser.add_argument('-g', '--gpus', type=int, nargs='+',default=list(range(torch.cuda.device_count())))
     args = parser.parse_args()
     
-    os.environ['CUDA_VISIBLE_DEVICES'] = args.gpus
+    os.environ['CUDA_VISIBLE_DEVICES'] = ",".join([str(g) for g in args.gpus])
 
     path_train_data = args.train_data
 
     init_lr = float(args.lr)
-    batch_size = int(args.batch_size)
+    
+    if args.batch_size is None:
+        batch_size = len(args.gpus)
+        batch_size = max(1, batch_size) # if no gpus on the machine
+    else:
+        batch_size = int(args.batch_size)
+    
     DEBUG = args.name == "debug"
 
     params = {
@@ -115,6 +121,7 @@ def train_dp():
     optimizer = optim.Adam(net.parameters(), lr=init_lr)
 
     log('    train_data:', path_train_data.split("/")[-2])
+    log('    batch_size:', batch_size)
     log('    num_batch:', num_batch)
     log('    train_x:', train_x.shape)
     log('    train_y:', train_y.shape)
@@ -201,7 +208,7 @@ def train_dp():
 
         # save model, with policy
         loss = epoch_loss
-        if 0.2 < loss <= 0.5:
+        if 0.2 < loss:
             fn = int(loss * 10) * 10
             saver_agent.save_model(net, name='loss_' + str(fn))
         elif 0.001 < loss <= 0.20:
@@ -210,8 +217,8 @@ def train_dp():
         elif loss <= 0.001:
             log('Finished')
             return
-        else:
-            saver_agent.save_model(net, name='loss_high')
+#        else:
+#            saver_agent.save_model(net, name='loss_high')
 
 
 if __name__ == '__main__':
