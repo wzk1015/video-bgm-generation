@@ -32,7 +32,7 @@ def dense_optical_flow(method, video_path, params=[], to_gray=False):
 #	print(video_path)
 	assert os.path.exists(video_path)
 	metadata = skvideo.io.ffprobe(video_path)
-	print(metadata)
+	print("video loaded successfully")
 	frame, time = metadata['video']['@avg_frame_rate'].split('/')
 	fps = round(float(frame) / float(time))
 	if os.path.exists(os.path.join(flow_dir, video_path.split('/')[-1].split('.')[0] + '.npz')):

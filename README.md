@@ -78,14 +78,14 @@ code for paper Video Background Music Generation with Controllable Music Transfo
 
 ## Inference
 
-* convert video into npz
+* convert video into npz (use the **Python2** environment)
 
   ```shell
   cd src/video2npz
   sh video2npz.sh ../../videos/xxx.mp4
   ```
   
-  
+  * try resizing the video if this takes a long time
   
 * run model to generate `.mid` : 
 

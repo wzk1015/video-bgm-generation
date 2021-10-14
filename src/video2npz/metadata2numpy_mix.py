@@ -136,7 +136,7 @@ if __name__ == '__main__':
     print('processing to save to %s' % target_path)
     input_numpy = metadata2numpy(metadata)
     np.savez(target_path, input=input_numpy)
-    print("saved to", target_path)
+    print("saved to" + target_path)
 
     # for video_name in os.listdir(args.video_dir):
     #     target_path = os.path.join(vargs.video_dir, 'npz', video_name.replace('.mp4', '.npz'))
