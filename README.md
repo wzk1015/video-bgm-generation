@@ -33,29 +33,21 @@ code for paper Video Background Music Generation with Controllable Music Transfo
 
 * download pretrained model `loss_8_params.pt` from [HERE](https://drive.google.com/file/d/1MWnwwAdOrjC31dSy8kfyxHwv35wK0pQh/view?usp=sharing) and put  it under `exp/` 
 
-* install `ffmpeg`
-
-  ```shell
-  conda install ffmpeg=4.2
-  ```
+* install `ffmpeg=3.2.4` 
 
 * prepare a Python3 conda environment
 
   ```shell
-  conda create -n cmt_py3 python=3.7
-  conda activate cmt_py3
   pip install -r py3_requirements.txt
   ```
-
+  
 * prepare a Python2 conda environment (for extracting visbeat)
 
   * ````shell
-    conda create -n cmt_py2 python=2.7
-    conda activate cmt_py2
     pip install -r py2_requirements.txt
     ````
     
-  * open `visbeat` package directory (e.g. `anaconda3/envs/cmt_py2/lib/python2.7/site-packages/visbeat`), replace the original `Video_CV.py` with `src/video2npz/Video_CV.py`
+  * open `visbeat` package directory (e.g. `anaconda3/envs/XXXX/lib/python2.7/site-packages/visbeat`), replace the original `Video_CV.py` with `src/video2npz/Video_CV.py`
 
 
 
@@ -90,18 +82,7 @@ code for paper Video Background Music Generation with Controllable Music Transfo
 
   ```shell
   cd src/video2npz
-  
-  # extract flow magnitude into optical_flow/flow.npz
-  conda activate cmt_py3
-  python optical_flow.py --video ../../videos/xxx.mp4
-  
-  # convert video into metadata.json with flow magnitude
-  conda activate cmt_py2
-  python video2metadata.py --video ../../videos/xxx.mp4
-  
-  # convert metadata into .npz under `inference/`
-  conda activate cmt_py3
-  python metadata2numpy_mix.py --video ../../videos/xxx.mp4
+  sh video2npz.sh ../../videos/xxx.mp4
   ```
   
   
@@ -116,6 +97,8 @@ code for paper Video Background Music Generation with Controllable Music Transfo
   ```
 
   * if using another training set, change `decoder_n_class` in `gen_midi_conditional` to the `decoder_n_class` in `train_encoder.py`
+
+    
 
 * convert midi into audio (e.g. `.m4a`): use GarageBand (recommended) or midi2audio 
 

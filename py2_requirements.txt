@@ -42,3 +42,4 @@ termcolor==1.1.0
 tqdm==4.59.0
 urllib3==1.26.3
 visbeat==0.0.9
+scikit-video

@@ -1,3 +1,4 @@
+#encoding=utf-8
 import cv2
 import argparse
 import os
@@ -7,7 +8,7 @@ import skvideo.io
 from tqdm import tqdm
 
 
-def makedirs(dirs: list):
+def makedirs(dirs):
 	for dir in dirs:
 		if not os.path.exists(dir):
 			os.makedirs(dir)
@@ -15,8 +16,7 @@ def makedirs(dirs: list):
 video_dir = '../../videos/'
 flow_dir = 'flow/'
 fig_dir = 'fig/'
-optical_flow_dir = 'optical_flow'
-makedirs([video_dir, flow_dir, fig_dir, optical_flow_dir])
+makedirs([video_dir, flow_dir, fig_dir, 'optical_flow/'])
 
 TIME_PER_BAR = 2  # 暂定2s一小节
 
@@ -92,10 +92,10 @@ def dense_optical_flow(method, video_path, params=[], to_gray=False):
 	frame_per_bar = TIME_PER_BAR * fps
 	flow_magnitude_per_bar = []
 	temp = np.zeros((len(flow_magnitude_list)))
-	for i in range(0, len(flow_magnitude_list), frame_per_bar):
-		mean_flow = np.mean(flow_magnitude_list[i : min(i+frame_per_bar, len(flow_magnitude_list))])
+	for i in np.arange(0, len(flow_magnitude_list), frame_per_bar):
+		mean_flow = np.mean(flow_magnitude_list[int(i) : min(int(i+frame_per_bar), len(flow_magnitude_list))])
 		flow_magnitude_per_bar.append(mean_flow)
-		temp[i : min(i+frame_per_bar, len(flow_magnitude_list))] = mean_flow
+		temp[int(i) : min(int(i+frame_per_bar), len(flow_magnitude_list))] = mean_flow
 
 	np.savez(os.path.join(flow_dir, video_path.split('/')[-1].split('.')[0] + '.npz'), flow=np.asarray(flow_magnitude_list))
 
