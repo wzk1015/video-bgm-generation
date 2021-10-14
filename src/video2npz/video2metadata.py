@@ -54,7 +54,7 @@ def process_video(video_path, args):
 
     vb.Video.getVisualTempo = vb.Video_CV.getVisualTempo
 
-    video = video_path.split(os.sep)[-1]
+    video = os.path.basename(video_path)
     vlog = vb.PullVideo(name=video, source_location=osp.join(video_path), max_height=360)
     vbeats = vlog.getVisualBeatSequences(search_window=None)[0]
 

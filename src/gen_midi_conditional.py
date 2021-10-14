@@ -79,7 +79,7 @@ def generate():
     parser.add_argument('-g', '--gpus', type=int, nargs='+',default=list(range(torch.cuda.device_count())))
     args = parser.parse_args()
     
-    os.environ['CUDA_VISIBLE_DEVICES'] = args.gpus
+    os.environ['CUDA_VISIBLE_DEVICES'] = ",".join([str(g) for g in args.gpus])
     path_saved_ckpt = args.ckpt
     filelist = glob.glob(args.files)
     # outdir

@@ -35,8 +35,8 @@ def dense_optical_flow(method, video_path, params=[], to_gray=False):
 	print("video loaded successfully")
 	frame, time = metadata['video']['@avg_frame_rate'].split('/')
 	fps = round(float(frame) / float(time))
-	if os.path.exists(os.path.join(flow_dir, video_path.split('/')[-1].split('.')[0] + '.npz')):
-		flow_magnitude_list = list(np.load(os.path.join(flow_dir, video_path.split('/')[-1].split('.')[0] + '.npz'))['flow'])
+	if os.path.exists(os.path.join(flow_dir, os.path.basename(video_path).split('.')[0] + '.npz')):
+		flow_magnitude_list = list(np.load(os.path.join(flow_dir, os.path.basename(video_path).split('.')[0] + '.npz'))['flow'])
 	else:
 		# Read the video and first frame
 		video = skvideo.io.vread(video_path)[:]
@@ -67,22 +67,7 @@ def dense_optical_flow(method, video_path, params=[], to_gray=False):
 			flow_magnitude = np.mean(np.abs(flow))
 			flow_magnitude_list.append(flow_magnitude)
 
-			# # Encoding: convert the algorithm's output into Polar coordinates
-			# mag, ang = cv2.cartToPolar(flow[..., 0], flow[..., 1])
-			# # Use Hue and Value to encode the Optical Flow
-			# hsv[..., 0] = ang * 180 / np.pi / 2
-			# hsv[..., 2] = cv2.normalize(mag, None, 0, 255, cv2.NORM_MINMAX)
 
-			# # Convert HSV image into BGR for demo
-			# bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
-			# cv2.putText(frame_copy, '%.2f' % flow_magnitude, ORG, FONT, FONT_SCALE, COLOR, THICKNESS)
-			# cv2.putText(bgr, '%.2f' % flow_magnitude, ORG, FONT, FONT_SCALE, COLOR, THICKNESS)
-			# cv2.imshow("frame", frame_copy)
-			# cv2.imshow("optical flow", bgr)
-			# optical_flow[i-1] = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
-			# k = cv2.waitKey(25) & 0xFF
-			# if k == 27:
-			# 	break
 
 			# Update the previous frame
 			old_frame = new_frame
@@ -97,7 +82,7 @@ def dense_optical_flow(method, video_path, params=[], to_gray=False):
 		flow_magnitude_per_bar.append(mean_flow)
 		temp[int(i) : min(int(i+frame_per_bar), len(flow_magnitude_list))] = mean_flow
 
-	np.savez(os.path.join(flow_dir, video_path.split('/')[-1].split('.')[0] + '.npz'), flow=np.asarray(flow_magnitude_list))
+	np.savez(os.path.join(flow_dir, os.path.basename(video_path).split('.')[0] + '.npz'), flow=np.asarray(flow_magnitude_list))
 
 	# 绘制flow强度折线图
 	x = np.arange(0, len(flow_magnitude_list))
@@ -109,7 +94,7 @@ def dense_optical_flow(method, video_path, params=[], to_gray=False):
 	# plt.ylabel('Optical Flow Magnitude')
 	# plt.legend()
 	# plt.show()
-	plt.savefig(os.path.join(fig_dir, video_path.split('/')[-1].split('.')[0] + '.jpg'))
+	plt.savefig(os.path.join(fig_dir, os.path.basename(video_path).split('.')[0] + '.jpg'))
 
 	# return optical_flow, flow_magnitude_list
 	return flow_magnitude_per_bar, flow_magnitude_list
