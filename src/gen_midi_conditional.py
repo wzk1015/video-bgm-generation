@@ -17,7 +17,7 @@ sys.path.append("../lpd_dataset/")
 from numpy2midi_mix import numpy2midi
 from dictionary_mix import genre
 
-num_songs = 3
+num_songs = 10
 
 
 def cal_control_error(err_note_number_list, err_beat_number_list):
@@ -105,12 +105,14 @@ def generate():
     if len(filelist) == 0:
         raise RuntimeError('no npz file in ' + str(filelist))
 
-    ###
-    #genre = {
-    #    'Pop'       : 5,
-    #    'Rock'      : 6,
-    #}
-    genre = {'no_genre': 0}
+    genre = {
+        'Metal': 1,
+        'Country': 2,
+        'dance': 3,
+        'Electronic': 4,
+        'Pop'       : 5,
+        'Rock'      : 6,
+    }
 
     for file_name in filelist:
         # gen
@@ -128,7 +130,7 @@ def generate():
                     print("new song")
                     start_time = time.time()
                     vlog_npz = np.load(file_name)['input']
-                    '''
+                    
                     pre_init = np.array([
                         [value, 0, 0],  # genre
                         [0, 0, 0],  # key
@@ -138,8 +140,6 @@ def generate():
                         [0, 0, 4],
                         [0, 0, 5],
                     ])
-                    '''
-                    pre_init = np.zeros((7, 3), dtype=np.int32)
 
                     C = 0.7
                     vlog_npz = vlog_npz[vlog_npz[:, 2] != 1]
@@ -186,3 +186,4 @@ def generate():
 if __name__ == '__main__':
     print("inference")
     generate()
+    
