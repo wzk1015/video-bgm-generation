@@ -7,14 +7,9 @@ from fast_transformers.builders import TransformerEncoderBuilder, TransformerDec
 from fast_transformers.masking import TriangularCausalMask, FullMask
 from fast_transformers.builders import RecurrentEncoderBuilder
 
-# D_MODEL = 256
-# N_LAYER_ENCODER = 4
-# N_LAYER_DECODER = 8
-# N_HEAD = 8
 
 D_MODEL = 512
 N_LAYER_ENCODER = 12
-# N_LAYER_DECODER = 12
 N_HEAD = 8
 
 ATTN_DECODER = "causal-linear"
@@ -148,7 +143,6 @@ class BaseModel(nn.Module):
         raise NotImplementedError
 
     def compute_loss(self, predict, target, loss_mask):
-        # import ipdb; ipdb.set_trace()
         loss = self.loss_func(predict, target)
         loss = loss * loss_mask
         loss = torch.sum(loss) / torch.sum(loss_mask)
@@ -156,14 +150,12 @@ class BaseModel(nn.Module):
 
 
     def forward_init_token_vis(self, x, memory=None, is_training=True):
-        # import ipdb;ipdb.set_trace()
         emb_genre = self.init_emb_genre(x[..., 0])
         emb_key = self.init_emb_key(x[..., 1])
         emb_instrument = self.init_emb_instrument(x[..., 2])
         return emb_genre, emb_key, emb_instrument
 
     def forward_init_token(self, x, memory=None, is_training=True):
-        # import ipdb;ipdb.set_trace()
         emb_genre = self.init_emb_genre(x[..., 0])
         emb_key = self.init_emb_key(x[..., 1])
         emb_instrument = self.init_emb_instrument(x[..., 2])
@@ -220,13 +212,8 @@ class BaseModel(nn.Module):
             assert init_token is not None
             init_emb_linear = self.forward_init_token(init_token)
             encoder_pos_emb = torch.cat([init_emb_linear, encoder_pos_emb], dim=1)
-        # import ipdb;ipdb.set_trace()
         # transformer
         if is_training:
-            # if ATTN_DECODER == "causal-linear":
-            #     decoder_mask = TriangularCausalMask(decoder_pos_emb.size(1), device=x.device)
-            # else:
-            #     decoder_mask = FullMask(decoder_pos_emb.size(1), device=x.device)
             attn_mask = TriangularCausalMask(encoder_pos_emb.size(1), device=x.device)
             encoder_hidden = self.transformer_encoder(encoder_pos_emb, attn_mask)
             # print("forward decoder done")
@@ -240,9 +227,6 @@ class BaseModel(nn.Module):
             h = h.squeeze(0)
             y_type = self.proj_type(h)
 
-            # pos_emb = encoder_pos_emb.squeeze(0)
-            # h, memory = self.transformer_encoder(pos_emb, memory=memory)
-            # y_type = self.proj_type(h)
             return h, y_type
 
     def forward_output(self, h, y):
@@ -269,9 +253,6 @@ class BaseModel(nn.Module):
         '''
         for inference
         '''
-        # sample type
-        # print(y_type.shape)
-        # exit(0)
         y_type_logit = y_type[0, :]  # dont know wtf
         cur_word_type = sampling(y_type_logit, p=0.90)
 
@@ -283,9 +264,6 @@ class BaseModel(nn.Module):
 
         tf_skip_type = self.encoder_emb_type(type_word_t).squeeze(0)
 
-        # print("y_type", y_type.shape, "h", h.shape, "tf_skip", tf_skip_type.shape,
-        #       "cur word type", cur_word_type.shape, "type word t", type_word_t.shape)
-        # exit(0)
         # concat
         y_concat_type = torch.cat([h, tf_skip_type], dim=-1)
         y_ = self.project_concat_type(y_concat_type)
@@ -337,8 +315,6 @@ class BaseModel(nn.Module):
         dictionary = {'bar': 17}
         if vlog is None:
             pre_init = np.array([
-            #    [2, 0, 0],  # genre
-            #    [0, 1, 0],  # key
                 [0, 0, 1],
                 [0, 0, 2],
                 [0, 0, 3],
@@ -394,7 +370,6 @@ class BaseModel(nn.Module):
                 p_beat = 1
                 cur_bar = 0
                 while (True):
-                    # replace = False
                     # sample others
                     print(idx, end="\r")
                     idx += 1
@@ -478,8 +453,6 @@ class BaseModel(nn.Module):
                     else:
                         # memory_backup = copy.deepcopy(memory)
                         h, y_type = self.forward_hidden(input_, is_training=False, init_token=pre_init)
-                    # import ipdb; ipdb.set_trace()
-                    # print('memory_shape', memory.shape)
                     if next_arr[1] == 0:
                         print("EOS predicted")
                         break
@@ -497,7 +470,6 @@ class BaseModel(nn.Module):
         print(final_res.shape)
         return final_res, err_note_number_list, err_beat_number_list
 
-    # def inference_from_scratch(self, dictionary):
 
 
 class ModelForTraining(BaseModel):
@@ -508,8 +480,6 @@ class ModelForTraining(BaseModel):
         return TransformerDecoderBuilder
 
     def forward(self, x, target, loss_mask, init_token):
-        # encoder_hidden = self.forward_encoder(x)
-        # h, y_type = self.forward_decoder(x, memory=encoder_hidden, is_training=True)
         h, y_type = self.forward_hidden(x, memory=None, is_training=True, init_token=init_token)
         y_barbeat, y_pitch, y_duration, y_instr, y_onset_density, y_beat_density = self.forward_output(h, target)
 
@@ -544,11 +514,9 @@ class ModelForTraining(BaseModel):
 class ModelForInference(BaseModel):
     def get_encoder_builder(self):
         return TransformerEncoderBuilder
-        # return RecurrentEncoderBuilder
 
     def get_decoder_builder(self):
         return TransformerDecoderBuilder
-        # return RecurrentDecoderBuilder
 
     def forward(self, vlog=None, o_den_track_list=(1, 2, 3), pre_init=None, visualize=False,
                 C=1.0):

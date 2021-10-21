@@ -11,7 +11,7 @@ from tqdm import tqdm
 from dictionary_mix import preset_event2word, preset_word2event
 
 
-np.random.seed(208)
+#np.random.seed(208)
 
 RESOLUTION = 16  # 每小节16个时间单位
 ENCODER_MAX_LEN = 1500

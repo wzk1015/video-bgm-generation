@@ -63,23 +63,15 @@ def train_dp():
     train_data = np.load(path_train_data, allow_pickle=True)
     train_x = train_data['x'][:, :, [1, 0, 2, 3, 4, 5, 6, 9, 7]]
     train_y = train_data['y'][:, :, [1, 0, 2, 3, 4, 5, 6, 9, 7]]
-    # train_x = train_data['x'][:, :, [1, 0, 2, 3, 4, 5, 6]]
-    # train_y = train_data['y'][:, :, [1, 0, 2, 3, 4, 5, 6]]
     train_mask = train_data['decoder_mask'][:, :9999]
 
     metadata = train_data['metadata']
-    # import ipdb;ipdb.set_trace()
     for i, m in enumerate(metadata):
         total = m["de_len"] - 1
         train_x[i, :total, 7] = train_x[i, :total, 7] + 1
 
 
     init_token = np.zeros((train_x.shape[0], 7, 3), dtype=np.int32)
-#    for i, x in enumerate(train_data['metadata']):
-#        for j, k in enumerate(x["instruments"]):
-#            init_token[i, j + 2, 2] = int(init_dictionary["instr_type"][k])
-#        init_token[i, 0, 0] = int(init_dictionary["genre"][x["genre"]])
-        # init_token[i, 1, 1] = int(init_dictionary["key"][x["key"]])
 
     num_batch = len(train_x) // batch_size
 
