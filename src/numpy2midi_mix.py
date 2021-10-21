@@ -17,8 +17,6 @@ INSTRUMENT_PROGRAM = {
     'Strings':  41  # Viola
 }
 
-# restored_midi_dir = '../restored_midi/'
-
 
 def test_numpy2midi(idx: int) -> muspy.Music:
     npz = np.load('lpd_5_ccdepr_mix_v4_10000.npz', allow_pickle=True)
@@ -56,17 +54,10 @@ def numpy2midi(name, decoder: np.ndarray) -> muspy.Music:
 
     muspy_music = muspy.Music(resolution=RESOLUTION//4, tracks=muspy_tracks)
 
-    # if not os.path.exists(restored_midi_dir):
-    #     os.makedirs(restored_midi_dir)
-    # out_path = os.path.join(restored_midi_dir, name + '.mid')
-    # muspy.write_midi(out_path, muspy_music)
     muspy.write_midi(name + ".mid", muspy_music)
 
     return muspy_music
 
 
 if __name__ == '__main__':
-    # id = 'TRMYZZH12903CE4730'
-    # id = 'TRMYQLW128F933A70D'
-    # id = 'TRLABJZ128F42A0DD7'
     test_numpy2midi(idx=66)

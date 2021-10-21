@@ -90,7 +90,7 @@ def generate():
                     [0, 0, 5],
                 ])
 
-                C = 0.7
+                C = 0.3
                 vlog_npz = vlog_npz[vlog_npz[:, 2] != 1]
                 print(vlog_npz)
 

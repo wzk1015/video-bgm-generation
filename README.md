@@ -1,6 +1,8 @@
 # CMT
 
-code for paper Video Background Music Generation with Controllable Music Transformer (ACM MM 2021 Oral) [[Paper]](https://raw.githubusercontent.com/wzk1015/wzk1015.github.io/master/cmt/paper.pdf) [[Site]](https://wzk1015.github.io/cmt/)
+Code for paper Video Background Music Generation with Controllable Music Transformer (ACM MM 2021 Oral) 
+
+[[Paper]](https://raw.githubusercontent.com/wzk1015/wzk1015.github.io/master/cmt/paper.pdf) [[Site]](https://wzk1015.github.io/cmt/)
 
 
 
@@ -21,7 +23,7 @@ code for paper Video Background Music Generation with Controllable Music Transfo
 
 * `exp/`: checkpoints, named after val loss (e.g. loss_13_params.pt)
 
-* `inference/`: processed video for inference, in the format of npz
+* `inference/`: processed video for inference (.npz), and generated music(.mid) 
 
 
 

@@ -25,11 +25,6 @@ DIMENSION = {
 }
 N_DIMENSION = len(DIMENSION)
 
-# with open('metadata.json', 'r') as f:
-# # with open('metadata_v2_vlog2.json', 'r') as f:
-# # with open('metadata_v1.json', 'r') as f:
-# # with open('metadata_v2.json', 'r') as f:
-#     metadata_all = json.load(f)
 
 
 def _cal_b_density(flow_magnitude):

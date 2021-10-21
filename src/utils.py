@@ -208,16 +208,6 @@ class Saver(object):
         self.global_step += 1
 
 
-"""
-file modes
-'a': 
-    Opens a file for appending. The file pointer is at the end of the file if the file exists. 
-    That is, the file is in the append mode. If the file does not exist, it creates a new file for writing.
-
-'w':
-    Opens a file for writing only. Overwrites the file if the file exists.
-    If the file does not exist, creates a new file for writing.
-"""
 
 
 def make_loss_report(

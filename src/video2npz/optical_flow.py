@@ -52,11 +52,9 @@ def dense_optical_flow(method, video_path, params=[], to_gray=False):
 			old_frame = cv2.cvtColor(old_frame, cv2.COLOR_RGB2GRAY)
 
 		flow_magnitude_list = []
-		# optical_flow = np.zeros_like(video)
 		for i in tqdm(range(1, n_frames)):
 			# Read the next frame
 			new_frame = video[i]
-			# frame_copy = cv2.cvtColor(new_frame, cv2.COLOR_RGB2BGR)
 
 			# Preprocessing for exact method
 			if to_gray:
@@ -67,12 +65,9 @@ def dense_optical_flow(method, video_path, params=[], to_gray=False):
 			flow_magnitude = np.mean(np.abs(flow))
 			flow_magnitude_list.append(flow_magnitude)
 
-
-
 			# Update the previous frame
 			old_frame = new_frame
 	
-	# cv2.destroyAllWindows()
 
 	frame_per_bar = TIME_PER_BAR * fps
 	flow_magnitude_per_bar = []
@@ -87,13 +82,8 @@ def dense_optical_flow(method, video_path, params=[], to_gray=False):
 	# 绘制flow强度折线图
 	x = np.arange(0, len(flow_magnitude_list))
 	plt.figure(figsize=(10, 4))
-	# plt.plot(x, flow_magnitude_list, 'r.')
 	plt.plot(x, temp, 'b.')
 	plt.title('Optical Flow Magnitude')
-	# plt.xlabel('Frame')
-	# plt.ylabel('Optical Flow Magnitude')
-	# plt.legend()
-	# plt.show()
 	plt.savefig(os.path.join(fig_dir, os.path.basename(video_path).split('.')[0] + '.jpg'))
 
 	# return optical_flow, flow_magnitude_list
@@ -107,29 +97,21 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	flow = []
-	if True:
-#		video_path = 'vlog_360p.mp4'
-	# for i, video_path in enumerate(os.listdir(video_dir)[:]):
-	# 	# try:
-	# 	print('Processing %d/%d: %s' % (i, len(os.listdir(video_dir)[:]), os.path.join(video_dir, video_path)))
-#		if '.mp4' in video_path:
-		if True:
-			video_path = args.video
-			print("video_path", video_path)
-			if args.method == 'lucaskanade_dense':
-				method = cv2.optflow.calcOpticalFlowSparseToDense
-				optical_flow, flow_magnitude_list = dense_optical_flow(method, video_path, to_gray=True)
-			elif args.method == 'farneback':
-				method = cv2.calcOpticalFlowFarneback
-				params = [0.5, 3, 15, 3, 5, 1.2, 0]  # default Farneback's algorithm parameters
-				optical_flow, flow_magnitude_list = dense_optical_flow(method, video_path, params, to_gray=True)
-			elif args.method == "rlof":
-				method = cv2.optflow.calcOpticalFlowDenseRLOF
-				optical_flow, flow_magnitude_list = dense_optical_flow(method, video_path)
+	
+	video_path = args.video
+	print("video_path", video_path)
+	if args.method == 'lucaskanade_dense':
+		method = cv2.optflow.calcOpticalFlowSparseToDense
+		optical_flow, flow_magnitude_list = dense_optical_flow(method, video_path, to_gray=True)
+	elif args.method == 'farneback':
+		method = cv2.calcOpticalFlowFarneback
+		params = [0.5, 3, 15, 3, 5, 1.2, 0]  # default Farneback's algorithm parameters
+		optical_flow, flow_magnitude_list = dense_optical_flow(method, video_path, params, to_gray=True)
+	elif args.method == "rlof":
+		method = cv2.optflow.calcOpticalFlowDenseRLOF
+		optical_flow, flow_magnitude_list = dense_optical_flow(method, video_path)
 
-			flow += optical_flow
-		# except Exception as ex:
-			# print(ex)
+	flow += optical_flow
 	
 	flow = np.asarray(flow)
 	for percentile in range(10, 101, 10):
@@ -137,5 +119,3 @@ if __name__ == '__main__':
 	np.savez('optical_flow/flow.npz', flow = flow)
 
 
-	# 保存Optical Flow
-	# skvideo.io.vwrite('optical_flow_%s.mp4' % args.method, optical_flow)

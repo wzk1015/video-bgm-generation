@@ -38,18 +38,14 @@ def process_all_videos(args):
         out_json[video_name] = metadata
 
     json_str = json.dumps(out_json, indent=4)
-    # with open('./metadata_v2.json', 'w') as f:
     with open(osp.join(args.video_dir, 'metadata.json'), 'w') as f:
         f.write(json_str)
 
 
 def process_video(video_path, args):
-    # figsize = (10, 4)
     figsize = (32, 4)
     dpi = 200
-    # xrange = (15, 35)
     xrange = (0, 95)
-    # xrange = None
     x_major_locator = MultipleLocator(2)
 
     vb.Video.getVisualTempo = vb.Video_CV.getVisualTempo
@@ -73,8 +69,6 @@ def process_video(video_path, args):
             vbeats_list.append(vbeat_dict)
     print('%d / %d vbeats selected' % (len(vbeats_list), len(vbeats)))
 
-    #	flow_magnitude_dir = os.path.join('VisBeatAssets/VideoSources', video_name, 'Data/Features/video/flow_magnitude')
-    #	flow_magnitude_list = np.load(os.path.join(flow_magnitude_dir, os.listdir(flow_magnitude_dir)[0]), allow_pickle=True)['value']
     npz = np.load("flow/" + video.replace('.mp4', '.npz'), allow_pickle=True)
     print(npz.keys())
     flow_magnitude_list = npz['flow']
@@ -94,11 +88,6 @@ def process_video(video_path, args):
         x = [fpb // 2 + i * fpb for i in range(len(fmpb))]  # 每个bar中间帧的idx
         y = fmpb
 
-        # Thumbnail
-        # thumbnails = [vlog.getFrame(f)[:] for f in x]
-        # thumbnails = np.concatenate(thumbnails, axis=1)
-        # thumbnails = cv2.cvtColor(thumbnails, cv2.COLOR_RGB2BGR)
-        # cv2.imwrite(osp.join('image', video_name + '_thumbnails' + '.png'), thumbnails)
         height = vlog.getFrame(0).shape[0]
         thumbnails = [vlog.getFrameFromTime(t)[:, :int(height * 2.5 / 10), :] for t in list(frange(25, 35, 1))]
         thumbnails = np.concatenate(thumbnails, axis=1)
@@ -118,23 +107,18 @@ def process_video(video_path, args):
             y_b_dens = [_cal_b_density(fm), _cal_b_density(fm)]
             if i == 0:
                 plt.plot(x_time, y_fm, 'r-', label='Per Bar', lw=3)
-            # plt.plot(x_time, y_b_dens, 'g-', label='Density', lw=3)
             else:
                 plt.plot(x_time, y_fm, 'r-', lw=3)
-            # plt.plot(x_time, y_b_dens, 'g-', lw=3)
         if xrange is not None:
             plt.xlim(xrange)
         ax = plt.gca()
         ax.xaxis.set_major_locator(x_major_locator)
         plt.xlabel('Time (s)')
         plt.ylabel('Optical Flow Magnitude')
-        # plt.legend(loc = "best")
         plt.legend(loc="upper left")
         plt.savefig(osp.join('image', video + '_flow' + '.eps'), format='eps', transparent=True)
         plt.savefig(osp.join('image', video + '_flow' + '.png'), format='png', transparent=True)
 
-        # Visbeats
-        # vlog.printVisualBeatSequences(figsize=(10, 4), save_path=osp.join('image', video_name + '_visbeat' + '.eps'), xrange=(15, 35))
         vlog.printVisualBeatSequences(figsize=figsize, save_path=osp.join('image', video + '_visbeat' + '.eps'),
                                       xrange=xrange, x_major_locator=x_major_locator)
 
@@ -150,16 +134,10 @@ if __name__ == '__main__':
     vb.SetAssetsDir('.' + os.sep + 'VisBeatAssets' + os.sep)
 
     parser = argparse.ArgumentParser()
-    # parser.add_argument('--process_all', action='store_true', help='Process the whole video dataset')
     parser.add_argument('--video', type=str, default='../../videos/wzk.mp4')
-    # parser.add_argument('--video_dir', type=str, default='../../videos/')
     parser.add_argument('--visualize', action='store_true', default=True)
     parser.add_argument('--resolution', type=int, default=1)
     args = parser.parse_args()
-
-    # if args.process_all:
-    # 	process_all_videos(args)
-    # else:
 
     metadata = process_video(args.video, args)
     with open("metadata.json", "w") as f:

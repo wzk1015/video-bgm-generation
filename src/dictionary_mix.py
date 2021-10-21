@@ -435,31 +435,6 @@ preset_event2word = {
         'Electronic': 32, 
         'Metal': 33,
 
-        # 'classic':      29,
-        # 'country':      30,
-        # 'dance':        31,
-        # 'electronic':   32,
-        # 'pop':          33,
-        # 'rock':         34,
-
-        # 'happy': 29,
-        # 'sad': 30,
-
-        # 'Rock':         29,
-        # 'Rap':          30,
-        # 'Latin':        31,
-        # 'Jazz':         32,
-        # 'Electronic':   33,
-        # 'Punk':         34,
-        # 'Pop':          35,
-        # 'New Age':      36,
-        # 'Metal':        37,
-        # 'RnB':          38,
-        # 'Country':      39,
-        # 'Reggae':       40,
-        # 'Folk':         41,
-        # 'Blues':        42,
-        # 'World':        43
     },
     "pitch": {
         0: 0,

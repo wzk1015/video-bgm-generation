@@ -34,30 +34,6 @@ DECODER_DIMENSION = {
 N_DECODER_DIMENSION = len(DECODER_DIMENSION)
 KEYS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']
 
-# 更新genre时，记得更新dictionary
-with open('../lpd_dataset/tagtraum.json', 'r') as f:
-    genre_dict = json.load(f)
-    i2g = genre_dict['i2g']
-    g2i = genre_dict['g2i']
-    '''
-    4360 songs, 15 genres
-    Pop            	1081	24.79%
-    Rock           	1666	38.21%
-    RnB            	262	    6.01%
-    Reggae         	53	    1.22%
-    Country        	447	    10.25%
-    Electronic     	352	    8.07%
-    Latin          	70	    1.61%
-    Metal          	112	    2.57%
-    Jazz           	125	    2.87%
-    Rap            	89	    2.04%
-    World          	10	    0.23%
-    New Age        	29	    0.67%
-    Punk           	12	    0.28%
-    Folk           	33	    0.76%
-    Blues          	19	    0.44%
-    '''
-
 
 class Note:
     def __init__(self, muspy_note=None, instr_type=None):  # bar starts from 0
@@ -160,8 +136,6 @@ class MIDI:
         self.id = id
         self.midi = muspy.read_midi(os.path.join(midi_dir, id + '.mid'))
         self.midi.adjust_resolution(target=RESOLUTION//4)
-#        self.genre = i2g[id]
-        # self.h5 = h5py.File(os.path.join(h5_dir, id + '.h5'), 'r')
 
         self.n_beat = self.midi.get_end_time()
         self.n_bars = math.ceil((self.n_beat + 1) / RESOLUTION)
@@ -217,11 +191,6 @@ def midi2numpy(id_list: list):
                 metadata = load_dict['metadata']
         else:
             
-    
-#    if True:
-#        for name in os.listdir(midi_dir):
-#            id = name.strip(".mid").strip(".midi")
-#            id_filename = os.path.join(json_dir, id + '.json')
             
             
             midi = MIDI(id)
@@ -242,32 +211,6 @@ def midi2numpy(id_list: list):
             with open(id_filename, 'w') as f:
                 json.dump(dic, f)
 
-        # # visualize o_dens
-        # o_dens_list = []
-        # for word in decoder_list:
-        #     if word[DECODER_DIMENSION['beat']] > 0 and word[DECODER_DIMENSION['beat']] < 17 and word[DECODER_DIMENSION['instr_type']] == 2:
-        #         o_dens_list.append(word[DECODER_DIMENSION['o_dens']])
-        # import matplotlib.pyplot as plt
-        # x = np.arange(0, len(o_dens_list))
-        # plt.figure(figsize=(10, 4))
-        # plt.plot(x, o_dens_list, 'r.')
-        # plt.title('Beat Strength')
-        # plt.savefig('beat_strength_%s.jpg' % id)
-        
-        # # visualize b_dens
-        # b_dens_list = []
-        # for word in decoder_list:
-        #     if word[DECODER_DIMENSION['beat']] == 17:
-        #         b_dens_list.append(word[DECODER_DIMENSION['b_dens']] - 1)
-        # temp = [0] * (RESOLUTION * len(b_dens_list))
-        # for i, b_dens in enumerate(b_dens_list):
-        #     temp[i * RESOLUTION: (i+1) * RESOLUTION] = [b_dens] * RESOLUTION
-        # import matplotlib.pyplot as plt
-        # x = np.arange(0, len(temp))
-        # plt.figure(figsize=(10, 4))
-        # plt.plot(x, temp, 'b.')
-        # plt.title('Beat Density')
-        # plt.savefig('beat_density_%s.jpg' % id)
 
         decoder.append(decoder_list)
         decoder_mask.append(de_mask)
@@ -289,13 +232,6 @@ def midi2numpy(id_list: list):
 
 
 if __name__ == '__main__':
-    # id_list = []
-    # for filename in os.listdir('/mnt/data3/brd/music_dataset/LPD/lpd_5/lpd_5_cleansed_midi/'):
-    #     if '.mid' in filename:
-    #         id_list.append(filename[:-4])
-#    id_list = []
-#    for genre in ['Pop', 'Rock', 'Country', 'Electronic', 'Metal']:
-#        id_list += g2i[genre]
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--midi_dir", default="../../lpd_5_cleansed_midi/", required=True)
