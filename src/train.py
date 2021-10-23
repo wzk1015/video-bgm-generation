@@ -20,24 +20,23 @@ def train_dp():
     parser = argparse.ArgumentParser(description="Demo of argparse")
     parser.add_argument('-n', '--name', default="debug")
     parser.add_argument('-l', '--lr', default=0.0001)
-    parser.add_argument('-b', '--batch_size')
+    parser.add_argument('-b', '--batch_size', default=6)
     parser.add_argument('-p', '--path')
     parser.add_argument('-e', '--epochs', default=200)
     parser.add_argument('-t', '--train_data', default='../dataset/lpd_5_prcem_mix_v8_10000.npz')
-    parser.add_argument('-g', '--gpus', type=int, nargs='+',default=list(range(torch.cuda.device_count())))
+    parser.add_argument('-g', '--gpus', type=int, nargs='+')
     args = parser.parse_args()
     
-    os.environ['CUDA_VISIBLE_DEVICES'] = ",".join([str(g) for g in args.gpus])
+    if args.gpus is None:
+        os.environ['CUDA_VISIBLE_DEVICES'] = ",".join([str(g) for g in list(range(torch.cuda.device_count()))])
+    else:
+        os.environ['CUDA_VISIBLE_DEVICES'] = ",".join([str(g) for g in args.gpus])
 
     path_train_data = args.train_data
 
     init_lr = float(args.lr)
     
-    if args.batch_size is None:
-        batch_size = len(args.gpus)
-        batch_size = max(1, batch_size) # if no gpus on the machine
-    else:
-        batch_size = int(args.batch_size)
+    batch_size = int(args.batch_size)
     
     DEBUG = args.name == "debug"
 

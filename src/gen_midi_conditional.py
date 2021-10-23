@@ -33,10 +33,16 @@ def generate():
     parser = argparse.ArgumentParser(description="Demo of argparse")
     parser.add_argument('-c', '--ckpt', default="../exp/loss_8_params.pt")
     parser.add_argument('-f', '--files', required=True)
-    parser.add_argument('-g', '--gpus', type=int, nargs='+', default=list(range(torch.cuda.device_count())))
+    parser.add_argument('-g', '--gpus')
     args = parser.parse_args()
     
-    os.environ['CUDA_VISIBLE_DEVICES'] = ",".join([str(g) for g in args.gpus])
+    if args.gpus is not None:
+        if not args.gpus.isnumeric():
+            raise RuntimeError('Only 1 GPU is needed for inference')
+        os.environ['CUDA_VISIBLE_DEVICES'] = args.gpus
+    else:
+        os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+
     path_saved_ckpt = args.ckpt
     filelist = glob.glob(args.files)
     # outdir
