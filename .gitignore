@@ -6,6 +6,7 @@
 /src_no_pos/
 /src/*.jpg
 /src/*.npz
+/src/metadata.json
 /dataset/*.npz
 /dataset/json_*/
 /src/video2npz/VisBeatAssets/
