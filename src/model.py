@@ -1,4 +1,3 @@
-import numpy as np
 import torch.cuda
 
 from utils import *
@@ -64,10 +63,21 @@ def sampling(logit, p=None, t=1.0):
         cur_word = weighted_sampling(probs)
     return cur_word
 
+'''
+last dimension of input data | attribute:
+0: bar/beat
+1: type
+2: density
+3: pitch
+4: duration
+5: instr
+6: strength onset_density
+7: time_encoding
+'''
 
-class BaseModel(nn.Module):
+class CMT(nn.Module):
     def __init__(self, n_token, init_n_token, is_training=True):
-        super(BaseModel, self).__init__()
+        super(CMT, self).__init__()
 
         print("D_MODEL", D_MODEL, " N_LAYER", N_LAYER_ENCODER, " N_HEAD", N_HEAD, "DECODER ATTN", ATTN_DECODER)
 
@@ -111,7 +121,7 @@ class BaseModel(nn.Module):
         self.encoder_time_linear = nn.Linear(int(self.time_encoding_size), self.d_model)
 
 
-        self.transformer_encoder = self.get_encoder_builder().from_kwargs(
+        self.transformer_encoder = TransformerEncoderBuilder.from_kwargs(
             n_layers=self.n_layer_encoder,
             n_heads=self.n_head,
             query_dimensions=self.d_model // self.n_head,
@@ -298,14 +308,9 @@ class BaseModel(nn.Module):
         return next_arr
 
 
-    def inference_from_scratch(self, vlog=None, o_den_track_list=[1, 2, 3],
-                               pre_init=None, visualize=False, C=1.0):
-        if visualize:
-            pre_init_t = torch.from_numpy(pre_init).long()
-            if torch.cuda.is_available():
-                pre_init_t = pre_init_t.cuda()
-            emb_genre, emb_key, emb_instrument = self.forward_init_token_vis(pre_init_t)
-            return emb_genre, emb_key, emb_instrument
+    def inference_from_scratch(self, **kwargs):
+        vlog=kwargs['vlog']
+        C=kwargs['C']
 
         def get_p_beat(cur_bar, cur_beat, n_beat):
             all_beat = cur_bar * 16 + cur_beat - 1
@@ -313,23 +318,20 @@ class BaseModel(nn.Module):
             return p_beat
 
         dictionary = {'bar': 17}
-        if vlog is None:
-            pre_init = np.array([
-                [0, 0, 1],
-                [0, 0, 2],
-                [0, 0, 3],
-                [0, 0, 0],
-                [0, 0, 0],
-            ])
-            init = np.array([
-                [17, 1, 5, 0, 0, 0, 0],  # bar
-            ])
-        else:
-            assert pre_init is not None
-            pre_init = pre_init
-            init = np.array([
-                [17, 1, vlog[0][1], 0, 0, 0, 0, 1, 0],  # bar
-            ])
+        o_den_track_list=[1, 2, 3]
+
+        pre_init = np.array([
+            [5, 0, 0],  
+            [0, 0, 0], 
+            [0, 0, 1],
+            [0, 0, 2],
+            [0, 0, 3],
+            [0, 0, 4],
+            [0, 0, 5],
+        ])
+        init = np.array([
+            [17, 1, vlog[0][1], 0, 0, 0, 0, 1, 0],  # bar
+        ])
 
         cnt_token = len(init)
         with torch.no_grad():
@@ -353,116 +355,109 @@ class BaseModel(nn.Module):
                 # memory_backup = copy.deepcopy(memory)
                 h, y_type = self.forward_hidden(input_, is_training=False, init_token=pre_init)
 
-            if True:
-                print('------- condition -------')
-                assert vlog is not None
-                n_beat = vlog[0][4]
-                len_vlog = len(vlog)
-                cur_vlog = 1
-                cur_track = 0
-                idx = 0
-                acc_beat_num = vlog[0][1]
-                beat_num = {}
-                acc_note_num = 0
-                note_num = 0
-                err_note_number_list = []
-                err_beat_number_list = []
-                p_beat = 1
-                cur_bar = 0
-                while (True):
-                    # sample others
-                    print(idx, end="\r")
-                    idx += 1
-                    next_arr = self.forward_output_sampling(h, y_type)
-                    if next_arr[1] == 1:
-                        replace = False
-                    if next_arr[1] == 2 and next_arr[5] == 0:
-                        next_arr[5] = 1
-                        print("warning note with instrument 0 detected, replaced by drum###################")
-                    if cur_vlog >= len_vlog:
-                        print("exceed vlog len")
-                        break
-                    vlog_i = vlog[cur_vlog]
-                    if vlog_i[0] == dictionary['bar'] and next_arr[0] == dictionary['bar']:
-                        err_beat_number = np.abs(len(beat_num.keys()) - acc_beat_num)
-                        err_beat_number_list.append(err_beat_number)
-                        flag = (np.random.rand() < C)
-                        print("replace beat density-----", vlog_i, next_arr)
-                        if flag:
-                            next_arr = np.array([17, 1, vlog_i[1], 0, 0, 0, 0])
-                            print("replace beat density-----", next_arr)
-                            beat_num = {}
-                            acc_beat_num = vlog_i[1]
-                            replace = True
-                            cur_vlog += 1
-                        else:
-                            print("replace denied----")
-                            cur_vlog += 1
-                    elif vlog_i[0] < dictionary['bar'] and next_arr[0] >= vlog_i[0]:
-                        err_note_number = np.abs(acc_note_num - note_num)
-                        err_note_number_list.append(err_note_number)
-                        print("replace onset density----", vlog_i, next_arr)
-                        if cur_track == 0:
-                            cur_density = next_arr[2]
-                            flag = (np.random.rand() < C)
-                            if next_arr[0] == dictionary['bar']:
-                                cur_density = 1
-                        if True:
-                            next_arr = np.array(
-                                [vlog_i[0], 1, cur_density, 0, 0, o_den_track_list[cur_track], vlog_i[2] + 0])
-                            replace = True
-                            acc_note_num = vlog_i[2] + 0
-                            note_num = 0
-                            cur_track += 1
-                            if cur_track >= len(o_den_track_list):
-                                cur_track = 0
-                                cur_vlog += 1
-                        else:
-                            print("replace denied----")
-                            cur_vlog += 1
-                            cur_track = 0
-                    if next_arr[1] == 1:
-                        beat_num[next_arr[0]] = 1
-                    elif next_arr[1] == 2 and replace == True:
-                        note_num += 1
-
-                    if next_arr[0] == dictionary['bar']:
-                        cur_bar += 1
-                    if next_arr[1] == 1:
-                        if next_arr[0] == 17:
-                            cur_beat = 1
-                        else:
-                            cur_beat = next_arr[0]
-                        p_beat = get_p_beat(cur_bar, cur_beat, n_beat)
-                    if p_beat >= 102:
-                        print("exceed max p_beat----")
-                        break
-                    next_arr = np.concatenate([next_arr, [p_beat], [cur_bar * 16 + cur_beat - 1]])
-                    final_res.append(next_arr[None, ...])
-                    # print('bar:', cnt_bar, end='  ==')
-                    # print_word_cp(next_arr)
-                    print(next_arr)
-                    # forward
-                    input_cur = torch.from_numpy(next_arr).long().unsqueeze(0).unsqueeze(0)
-                    if torch.cuda.is_available():
-                        input_cur = input_cur.cuda()
-                    input_ = torch.cat((input_, input_cur), dim=1)
-                    if replace:
-                        h, y_type = self.forward_hidden(input_, is_training=False, init_token=pre_init)
-                        # memory_backup = copy.deepcopy(memory)
+            print('------- condition -------')
+            assert vlog is not None
+            n_beat = vlog[0][4]
+            len_vlog = len(vlog)
+            cur_vlog = 1
+            cur_track = 0
+            idx = 0
+            acc_beat_num = vlog[0][1]
+            beat_num = {}
+            acc_note_num = 0
+            note_num = 0
+            err_note_number_list = []
+            err_beat_number_list = []
+            p_beat = 1
+            cur_bar = 0
+            while (True):
+                # sample others
+                print(idx, end="\r")
+                idx += 1
+                next_arr = self.forward_output_sampling(h, y_type)
+                if next_arr[1] == 1:
+                    replace = False
+                if next_arr[1] == 2 and next_arr[5] == 0:
+                    next_arr[5] = 1
+                    print("warning note with instrument 0 detected, replaced by drum###################")
+                if cur_vlog >= len_vlog:
+                    print("exceed vlog len")
+                    break
+                vlog_i = vlog[cur_vlog]
+                if vlog_i[0] == dictionary['bar'] and next_arr[0] == dictionary['bar']:
+                    err_beat_number = np.abs(len(beat_num.keys()) - acc_beat_num)
+                    err_beat_number_list.append(err_beat_number)
+                    flag = (np.random.rand() < C)
+                    print("replace beat density-----", vlog_i, next_arr)
+                    if flag:
+                        next_arr = np.array([17, 1, vlog_i[1], 0, 0, 0, 0])
+                        print("replace beat density-----", next_arr)
+                        beat_num = {}
+                        acc_beat_num = vlog_i[1]
+                        replace = True
+                        cur_vlog += 1
                     else:
-                        # memory_backup = copy.deepcopy(memory)
-                        h, y_type = self.forward_hidden(input_, is_training=False, init_token=pre_init)
-                    if next_arr[1] == 0:
-                        print("EOS predicted")
-                        break
-                    # print(next_arr)
+                        print("replace denied----")
+                        cur_vlog += 1
+                elif vlog_i[0] < dictionary['bar'] and next_arr[0] >= vlog_i[0]:
+                    err_note_number = np.abs(acc_note_num - note_num)
+                    err_note_number_list.append(err_note_number)
+                    print("replace onset density----", vlog_i, next_arr)
+                    if cur_track == 0:
+                        cur_density = next_arr[2]
+                        flag = (np.random.rand() < C)
+                        if next_arr[0] == dictionary['bar']:
+                            cur_density = 1
+                    if True:
+                        next_arr = np.array(
+                            [vlog_i[0], 1, cur_density, 0, 0, o_den_track_list[cur_track], vlog_i[2] + 0])
+                        replace = True
+                        acc_note_num = vlog_i[2] + 0
+                        note_num = 0
+                        cur_track += 1
+                        if cur_track >= len(o_den_track_list):
+                            cur_track = 0
+                            cur_vlog += 1
+                    else:
+                        print("replace denied----")
+                        cur_vlog += 1
+                        cur_track = 0
+                if next_arr[1] == 1:
+                    beat_num[next_arr[0]] = 1
+                elif next_arr[1] == 2 and replace == True:
+                    note_num += 1
 
-                    # if len(final_res) > 15000:
-                    #     print("exceed max len")
-                    #     break
-            else:
-                    pass
+                if next_arr[0] == dictionary['bar']:
+                    cur_bar += 1
+                if next_arr[1] == 1:
+                    if next_arr[0] == 17:
+                        cur_beat = 1
+                    else:
+                        cur_beat = next_arr[0]
+                    p_beat = get_p_beat(cur_bar, cur_beat, n_beat)
+                if p_beat >= 102:
+                    print("exceed max p_beat----")
+                    break
+                next_arr = np.concatenate([next_arr, [p_beat], [cur_bar * 16 + cur_beat - 1]])
+                final_res.append(next_arr[None, ...])
+                # print('bar:', cnt_bar, end='  ==')
+                # print_word_cp(next_arr)
+                print(next_arr)
+                # forward
+                input_cur = torch.from_numpy(next_arr).long().unsqueeze(0).unsqueeze(0)
+                if torch.cuda.is_available():
+                    input_cur = input_cur.cuda()
+                input_ = torch.cat((input_, input_cur), dim=1)
+                if replace:
+                    h, y_type = self.forward_hidden(input_, is_training=False, init_token=pre_init)
+                    # memory_backup = copy.deepcopy(memory)
+                else:
+                    # memory_backup = copy.deepcopy(memory)
+                    h, y_type = self.forward_hidden(input_, is_training=False, init_token=pre_init)
+                if next_arr[1] == 0:
+                    print("EOS predicted")
+                    break
+
 
 
         print('\n--------[Done]--------')
@@ -471,15 +466,17 @@ class BaseModel(nn.Module):
         return final_res, err_note_number_list, err_beat_number_list
 
 
+    def forward(self, **kwargs):
+        if kwargs['is_train']:
+            return self.train_forward(**kwargs)
+        return self.inference_from_scratch(**kwargs)
 
-class ModelForTraining(BaseModel):
-    def get_encoder_builder(self):
-        return TransformerEncoderBuilder
 
-    def get_decoder_builder(self):
-        return TransformerDecoderBuilder
-
-    def forward(self, x, target, loss_mask, init_token):
+    def train_forward(self, **kwargs):
+        x=kwargs['x']
+        target=kwargs['target']
+        loss_mask=kwargs['loss_mask']
+        init_token=kwargs['init_token']
         h, y_type = self.forward_hidden(x, memory=None, is_training=True, init_token=init_token)
         y_barbeat, y_pitch, y_duration, y_instr, y_onset_density, y_beat_density = self.forward_output(h, target)
 
@@ -509,16 +506,4 @@ class ModelForTraining(BaseModel):
             y_onset_density, target[..., 6], loss_mask)
 
         return loss_barbeat, loss_type, loss_pitch, loss_duration, loss_instr, loss_onset_density, loss_beat_density
-
-
-class ModelForInference(BaseModel):
-    def get_encoder_builder(self):
-        return TransformerEncoderBuilder
-
-    def get_decoder_builder(self):
-        return TransformerDecoderBuilder
-
-    def forward(self, vlog=None, o_den_track_list=(1, 2, 3), pre_init=None, visualize=False,
-                C=1.0):
-        return self.inference_from_scratch(vlog=vlog, o_den_track_list=o_den_track_list,
-                                           pre_init=pre_init, visualize=visualize, C=C)
+    

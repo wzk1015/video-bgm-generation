@@ -11,13 +11,13 @@ Code for paper Video Background Music Generation with Controllable Music Transfo
 ## Directory Structure
 
 * `src/`: code of the whole pipeline
-  * `train_encoder.py`: training script, take a npz as input music data to train the model 
-  * `model_encoder.py`: code of the model
+  * `train.py`: training script, take a npz as input music data to train the model 
+  * `model.py`: code of the model
   * `gen_midi_conditional.py`: inference script, take a npz (represents a video) as input to generate several songs
   
   * `src/video2npz/`: convert video into npz by extracting motion saliency and motion speed
   
-* `lpd_dataset/`: processed LPD dataset for training, in the format of npz
+* `dataset/`: processed dataset for training, in the format of npz
 
 * `logs/`: logs that automatically generate during training, can be used to track training status
 
@@ -31,7 +31,7 @@ Code for paper Video Background Music Generation with Controllable Music Transfo
 ## Preparation
 
 * clone this repo
-* download `lpd_5_prcem_mix_v8_10000.npz`  from [HERE](https://drive.google.com/file/d/1Ud2-GXEr4PbRDDe-FZJwzqqZrbbWFxM-/view?usp=sharing) and put it under `lpd_dataset/` 
+* download `lpd_5_prcem_mix_v8_10000.npz`  from [HERE](https://drive.google.com/file/d/1Ud2-GXEr4PbRDDe-FZJwzqqZrbbWFxM-/view?usp=sharing) and put it under `dataset/` 
 
 * download pretrained model `loss_8_params.pt` from [HERE](https://drive.google.com/file/d/1MWnwwAdOrjC31dSy8kfyxHwv35wK0pQh/view?usp=sharing) and put  it under `exp/` 
 
@@ -55,7 +55,7 @@ Code for paper Video Background Music Generation with Controllable Music Transfo
 
 ## Training
 
-* If you want to use another training set:  convert training data from midi into npz under `lpd_dataset/`
+* If you want to use another training set:  convert training data from midi into npz under `dataset/`
 
   ```shell
   python midi2numpy_mix.py --midi_dir /PATH/TO/MIDIS/ --out_name data.npz 
@@ -64,7 +64,7 @@ Code for paper Video Background Music Generation with Controllable Music Transfo
 * train the model
 
   ```shell
-  python train_encoder.py -n XXX -g 0 1 2 3
+  python train.py -n XXX -g 0 1 2 3
   
   # -n XXX: the name of the experiment, will be the name of the log file & the checkpoints directory. if XXX is 'debug', checkpoints will not be saved
   # -l (--lr): initial learning rate
@@ -80,7 +80,7 @@ Code for paper Video Background Music Generation with Controllable Music Transfo
 
 ## Inference
 
-* convert video into npz (use the **Python2** environment)
+* convert video (MP4 format) into npz (use the **Python2** environment)
 
   ```shell
   cd src/video2npz
@@ -98,7 +98,7 @@ Code for paper Video Background Music Generation with Controllable Music Transfo
   # -f (--files): input npz file
   ```
 
-  * if using another training set, change `decoder_n_class` in `gen_midi_conditional` to the `decoder_n_class` in `train_encoder.py`
+  * if using another training set, change `decoder_n_class` in `gen_midi_conditional` to the `decoder_n_class` in `train.py`
 
     
 

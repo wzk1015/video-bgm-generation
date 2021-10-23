@@ -9,7 +9,7 @@ sys.path.append(".")
 
 import utils
 from utils import *
-from model_encoder import ModelForTraining
+from model import CMT
 
 from dictionary_mix import init_dictionary
 
@@ -23,7 +23,7 @@ def train_dp():
     parser.add_argument('-b', '--batch_size')
     parser.add_argument('-p', '--path')
     parser.add_argument('-e', '--epochs', default=200)
-    parser.add_argument('-t', '--train_data', default='../lpd_dataset/lpd_5_prcem_mix_v8_10000.npz')
+    parser.add_argument('-t', '--train_data', default='../dataset/lpd_5_prcem_mix_v8_10000.npz')
     parser.add_argument('-g', '--gpus', type=int, nargs='+',default=list(range(torch.cuda.device_count())))
     args = parser.parse_args()
     
@@ -90,7 +90,7 @@ def train_dp():
 
     # init
 
-    net = torch.nn.DataParallel(ModelForTraining(decoder_n_class, init_n_class))
+    net = torch.nn.DataParallel(CMT(decoder_n_class, init_n_class))
 
     if torch.cuda.is_available():
         net.cuda()
@@ -159,7 +159,7 @@ def train_dp():
                 batch_init = batch_init.cuda()
 
             # run
-            losses = net(batch_x, batch_y, batch_mask, batch_init)
+            losses = net(is_train=True, x=batch_x, target=batch_y, loss_mask=batch_mask, init_token=batch_init)
             losses = [l.sum() for l in losses]
             loss = (losses[0] + losses[1] + losses[2] + losses[3] + losses[4] + losses[5] + losses[6]) / 7
 

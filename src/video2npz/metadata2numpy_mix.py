@@ -11,7 +11,7 @@ import skvideo.io
 
 from optical_flow import dense_optical_flow
 from resize_video import resize_video
-from midi_utils.dictionary_mix import preset_event2word
+from dictionary_mix import preset_event2word
 from stat_mix import vbeat_weight_percentile, fmpb_percentile
 
 RESOLUTION = 16
@@ -102,6 +102,6 @@ if __name__ == '__main__':
     print('processing to save to %s' % target_path)
     input_numpy = metadata2numpy(metadata)
     np.savez(target_path, input=input_numpy)
-    print("saved to", target_path)
+    print("saved to "+str(target_path))
 
 

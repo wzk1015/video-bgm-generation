@@ -12,10 +12,11 @@ import argparse
 
 import sys
 
-sys.path.append("../lpd_dataset/")
+sys.path.append("../dataset/")
 
 from numpy2midi_mix import numpy2midi
 from dictionary_mix import genre
+from model import CMT
 
 num_songs = 10
 
@@ -29,12 +30,10 @@ def cal_control_error(err_note_number_list, err_beat_number_list):
 
 def generate():
     # path
-    from model_encoder import ModelForInference
-
     parser = argparse.ArgumentParser(description="Demo of argparse")
     parser.add_argument('-c', '--ckpt', default="../exp/loss_8_params.pt")
     parser.add_argument('-f', '--files', required=True)
-    parser.add_argument('-g', '--gpus', type=int, nargs='+',default=list(range(torch.cuda.device_count())))
+    parser.add_argument('-g', '--gpus', type=int, nargs='+', default=list(range(torch.cuda.device_count())))
     args = parser.parse_args()
     
     os.environ['CUDA_VISIBLE_DEVICES'] = ",".join([str(g) for g in args.gpus])
@@ -48,7 +47,7 @@ def generate():
     # log
 
     # init model
-    net = torch.nn.DataParallel(ModelForInference(decoder_n_class, init_n_token))
+    net = torch.nn.DataParallel(CMT(decoder_n_class, init_n_token))
 
     # load model
     print('[*] load model from:', path_saved_ckpt)
@@ -80,23 +79,10 @@ def generate():
                 start_time = time.time()
                 vlog_npz = np.load(file_name)['input']
                 
-                pre_init = np.array([
-                    [5, 0, 0],  
-                    [0, 0, 0], 
-                    [0, 0, 1],
-                    [0, 0, 2],
-                    [0, 0, 3],
-                    [0, 0, 4],
-                    [0, 0, 5],
-                ])
-
-                C = 0.3
                 vlog_npz = vlog_npz[vlog_npz[:, 2] != 1]
                 print(vlog_npz)
 
-                res, err_note_number_list, err_beat_number_list = net(vlog=vlog_npz,
-                                                                        o_den_track_list=[1, 2, 3], pre_init=pre_init,
-                                                                        C=C)
+                res, err_note_number_list, err_beat_number_list = net(is_train=False, vlog=vlog_npz, C=0.7)
                 
                 cal_control_error(err_note_number_list, err_beat_number_list)
 

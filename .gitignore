@@ -6,8 +6,8 @@
 /src_no_pos/
 /src/*.jpg
 /src/*.npz
-/lpd_dataset/*.npz
-/lpd_dataset/json_*/
+/dataset/*.npz
+/dataset/json_*/
 /src/video2npz/VisBeatAssets/
 /src/video2npz/image/*
 /src/video2npz/examples/*

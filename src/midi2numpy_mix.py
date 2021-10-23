@@ -217,9 +217,6 @@ def midi2numpy(id_list: list):
         metadata_list.append(metadata)
 
     print('max decoder length: %d' % max(decoder_len))
-    import matplotlib.pyplot as plt
-    plt.hist(decoder_len)
-    plt.savefig('../lpd_dataset/len.jpg')
 
     decoder = np.asarray(decoder, dtype=int)
     x = decoder[:, :-1]
@@ -239,8 +236,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     
     midi_dir = args.midi_dir
-    npz_filename = os.path.join("../lpd_dataset/", args.out_name)
-    json_dir = os.path.join("../lpd_dataset/json/")
+    npz_filename = os.path.join("../dataset/", args.out_name)
+    json_dir = os.path.join("../dataset/json/")
     
     id_list = [name.strip(".mid").strip(".midi") for name in os.listdir(midi_dir) if ".mid" in name]
     midi2numpy(id_list)
