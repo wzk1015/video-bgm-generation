@@ -1,6 +1,6 @@
 # CMT
 
-Code for paper Video Background Music Generation with Controllable Music Transformer (ACM MM 2021 Oral) 
+Code for paper Video Background Music Generation with Controllable Music Transformer (ACM MM 2021 Best Paper Award) 
 
 [[Paper]](https://raw.githubusercontent.com/wzk1015/wzk1015.github.io/master/cmt/paper.pdf) [[Site]](https://wzk1015.github.io/cmt/)
 
@@ -19,7 +19,7 @@ Code for paper Video Background Music Generation with Controllable Music Transfo
   
 * `dataset/`: processed dataset for training, in the format of npz
 
-* `logs/`: logs that automatically generate during training, can be used to track training status
+* `logs/`: logs that automatically generate during training, can be used to track training process
 
 * `exp/`: checkpoints, named after val loss (e.g. loss_13_params.pt)
 
@@ -80,7 +80,7 @@ Code for paper Video Background Music Generation with Controllable Music Transfo
 
 ## Inference
 
-* convert video (MP4 format) into npz (use the **Python2** environment)
+* convert input video (MP4 format) into npz (use the **Python2** environment)
 
   ```shell
   cd src/video2npz
@@ -89,32 +89,35 @@ Code for paper Video Background Music Generation with Controllable Music Transfo
   
   * try resizing the video if this takes a long time
   
+  
+  
 * run model to generate `.mid` : 
 
   ```shell
   python gen_midi_conditional.py -f "../inference/xxx.npz" -c "../exp/loss_8_params.pt"
   
-  # -c (--ckpt): checkpoints to be loaded
-  # -f (--files): input npz file
+  # -c: checkpoints to be loaded
+  # -f: input npz file
+  # -g: id of gpu (only one gpu is needed for inference) 
   ```
 
   * if using another training set, change `decoder_n_class` in `gen_midi_conditional` to the `decoder_n_class` in `train.py`
 
-    
+  
 
-* convert midi into audio (e.g. `.m4a`): use GarageBand (recommended) or midi2audio 
+* convert midi into audio: use GarageBand (recommended) or midi2audio 
 
-  * if using GarageBand, change tempo to the value of  `tempo` in `video2npz/metadata.json` 
+  * set tempo to the value of  `tempo` in `video2npz/metadata.json` 
 
   
 
 * combine original video and audio into video with BGM
 
   ````shell
-  ffmpeg -i 'xxx.mp4' -i 'yyy.m4a' -c:v copy -c:a aac -strict experimental -map 0:v:0 -map 1:a:0 'zzz.mp4'
+  ffmpeg -i 'xxx.mp4' -i 'yyy.mp3' -c:v copy -c:a aac -strict experimental -map 0:v:0 -map 1:a:0 'zzz.mp4'
   
   # xxx.mp4: input video
-  # yyy.m4a: audio file generated in the previous step
+  # yyy.mp3: audio file generated in the previous step
   # zzz.mp4: output video
   ````
 
