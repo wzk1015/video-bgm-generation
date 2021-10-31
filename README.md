@@ -1,8 +1,8 @@
 # CMT
 
-Code for paper Video Background Music Generation with Controllable Music Transformer (ACM MM 2021 Best Paper Award) 
+Code for paper *Video Background Music Generation with Controllable Music Transformer* (ACM MM 2021 Best Paper Award) 
 
-[[Paper]](https://raw.githubusercontent.com/wzk1015/wzk1015.github.io/master/cmt/paper.pdf) [[Site]](https://wzk1015.github.io/cmt/)
+[[Paper]](https://wzk1015.github.io/cmt/paper.pdf) [[Project Page]](https://wzk1015.github.io/cmt/) [[Bibtex]](https://wzk1015.github.io/cmt/cmt.bib)
 
 
 
@@ -121,9 +121,20 @@ Code for paper Video Background Music Generation with Controllable Music Transfo
   # zzz.mp4: output video
   ````
 
-  
 
 
+
+## Citation
+
+```bibtex
+@inproceedings{di2021video,
+  title={Video Background Music Generation with Controllable Music Transformer},
+  author={Di, Shangzhe and Jiang, Zeren and Liu, Si and Wang, Zhaokai and Zhu, Leyan and He, Zexin and Liu, Hongming and Yan, Shuicheng},
+  booktitle={Proceedings of the 29th ACM International Conference on Multimedia},
+  pages={2037--2045},
+  year={2021}
+}
+```
 
 
 
