@@ -1,4 +1,4 @@
-# CMT
+# Controllable Music Transformer
 
 Code for paper *Video Background Music Generation with Controllable Music Transformer* (ACM MM 2021 Best Paper Award) 
 
@@ -21,7 +21,7 @@ Code for paper *Video Background Music Generation with Controllable Music Transf
 
 * `logs/`: logs that automatically generate during training, can be used to track training process
 
-* `exp/`: checkpoints, named after val loss (e.g. loss_13_params.pt)
+* `exp/`: checkpoints, named after val loss (e.g. `loss_8_params.pt`)
 
 * `inference/`: processed video for inference (.npz), and generated music(.mid) 
 
@@ -65,15 +65,6 @@ Code for paper *Video Background Music Generation with Controllable Music Transf
 
   ```shell
   python train.py -n XXX -g 0 1 2 3
-  
-  # -n XXX: the name of the experiment, will be the name of the log file & the checkpoints directory. if XXX is 'debug', checkpoints will not be saved
-  # -l (--lr): initial learning rate
-  # -b (--batch_size): batch size
-  # -p (--path): if used, load model checkpoint from the given path
-  # -e (--epochs): number of epochs in training
-  # -t (--train_data): path of the training data (.npz file) 
-  # -g (--gpus): ids of gpu
-  # other model hyperparameters: modify the source .py files
   ```
 
 
@@ -95,14 +86,10 @@ Code for paper *Video Background Music Generation with Controllable Music Transf
 
   ```shell
   python gen_midi_conditional.py -f "../inference/xxx.npz" -c "../exp/loss_8_params.pt"
-  
-  # -c: checkpoints to be loaded
-  # -f: input npz file
-  # -g: id of gpu (only one gpu is needed for inference) 
   ```
-
+  
   * if using another training set, change `decoder_n_class` in `gen_midi_conditional` to the `decoder_n_class` in `train.py`
-
+  
   
 
 * convert midi into audio: use GarageBand (recommended) or midi2audio 

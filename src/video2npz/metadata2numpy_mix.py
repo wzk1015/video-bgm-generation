@@ -6,11 +6,7 @@ import math
 import argparse
 
 import numpy as np
-import cv2
-import skvideo.io
 
-from optical_flow import dense_optical_flow
-from resize_video import resize_video
 from dictionary_mix import preset_event2word
 from stat_mix import vbeat_weight_percentile, fmpb_percentile
 

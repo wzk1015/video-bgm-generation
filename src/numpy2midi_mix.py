@@ -1,12 +1,8 @@
-import os
-import pdb
-import json
-
 import muspy
 import numpy as np
 
 from midi2numpy_mix import Note, DECODER_DIMENSION, RESOLUTION
-from dictionary_mix import preset_event2word, preset_word2event
+from dictionary_mix import preset_event2word
 
 
 INSTRUMENT_PROGRAM = {

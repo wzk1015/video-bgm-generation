@@ -1,7 +1,5 @@
 import os
 
-import numpy as np
-
 
 def resize_video(video_name, in_dir='video', out_dir='video_360p', max_height=360):
     command = 'ffmpeg -i %s -strict -2 -vf scale=-1:%d %s -v quiet' % (

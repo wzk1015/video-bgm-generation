@@ -2,9 +2,8 @@ import torch.cuda
 
 from utils import *
 
-from fast_transformers.builders import TransformerEncoderBuilder, TransformerDecoderBuilder
-from fast_transformers.masking import TriangularCausalMask, FullMask
-from fast_transformers.builders import RecurrentEncoderBuilder
+from fast_transformers.builders import TransformerEncoderBuilder
+from fast_transformers.masking import TriangularCausalMask
 
 
 D_MODEL = 512
@@ -333,13 +332,10 @@ class CMT(nn.Module):
             [17, 1, vlog[0][1], 0, 0, 0, 0, 1, 0],  # bar
         ])
 
-        cnt_token = len(init)
         with torch.no_grad():
             final_res = []
-            memory = None
             h = None
 
-            cnt_bar = 1
             init_t = torch.from_numpy(init).long()
             pre_init = torch.from_numpy(pre_init).long().unsqueeze(0)
             if torch.cuda.is_available():
@@ -348,11 +344,9 @@ class CMT(nn.Module):
 
             print('------ initiate ------')
             for step in range(init.shape[0]):
-                # print_word_cp(init[step, :])
                 input_ = init_t[step, :].unsqueeze(0).unsqueeze(0)
                 print(input_)
                 final_res.append(init[step, :][None, ...])
-                # memory_backup = copy.deepcopy(memory)
                 h, y_type = self.forward_hidden(input_, is_training=False, init_token=pre_init)
 
             print('------- condition -------')
@@ -440,8 +434,6 @@ class CMT(nn.Module):
                     break
                 next_arr = np.concatenate([next_arr, [p_beat], [cur_bar * 16 + cur_beat - 1]])
                 final_res.append(next_arr[None, ...])
-                # print('bar:', cnt_bar, end='  ==')
-                # print_word_cp(next_arr)
                 print(next_arr)
                 # forward
                 input_cur = torch.from_numpy(next_arr).long().unsqueeze(0).unsqueeze(0)
@@ -450,9 +442,7 @@ class CMT(nn.Module):
                 input_ = torch.cat((input_, input_cur), dim=1)
                 if replace:
                     h, y_type = self.forward_hidden(input_, is_training=False, init_token=pre_init)
-                    # memory_backup = copy.deepcopy(memory)
                 else:
-                    # memory_backup = copy.deepcopy(memory)
                     h, y_type = self.forward_hidden(input_, is_training=False, init_token=pre_init)
                 if next_arr[1] == 0:
                     print("EOS predicted")

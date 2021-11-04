@@ -1,4 +1,3 @@
-import pickle
 import sys
 import datetime
 import argparse
@@ -11,20 +10,18 @@ import utils
 from utils import *
 from model import CMT
 
-from dictionary_mix import init_dictionary
-
 
 
 
 def train_dp():
-    parser = argparse.ArgumentParser(description="Demo of argparse")
-    parser.add_argument('-n', '--name', default="debug")
-    parser.add_argument('-l', '--lr', default=0.0001)
-    parser.add_argument('-b', '--batch_size', default=6)
-    parser.add_argument('-p', '--path')
-    parser.add_argument('-e', '--epochs', default=200)
-    parser.add_argument('-t', '--train_data', default='../dataset/lpd_5_prcem_mix_v8_10000.npz')
-    parser.add_argument('-g', '--gpus', type=int, nargs='+')
+    parser = argparse.ArgumentParser(description="Args for training CMT")
+    parser.add_argument('-n', '--name', default="debug", help="Name of the experiment, also the log file and checkpoint directory. If 'debug', checkpoints won't be saved")
+    parser.add_argument('-l', '--lr', default=0.0001, help="Initial learning rate")
+    parser.add_argument('-b', '--batch_size', default=6, help="Batch size")
+    parser.add_argument('-p', '--path', help="If set, load model from the given path")
+    parser.add_argument('-e', '--epochs', default=200, help="Num of epochs")
+    parser.add_argument('-t', '--train_data', default='../dataset/lpd_5_prcem_mix_v8_10000.npz', help="Path of the training data (.npz file)")
+    parser.add_argument('-g', '--gpus', type=int, nargs='+', help="Ids of gpu")
     args = parser.parse_args()
     
     if args.gpus is None:

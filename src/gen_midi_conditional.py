@@ -1,21 +1,16 @@
 import sys
 import os
 
-import math
 import time
 import glob
-import json
 import numpy as np
 
 import torch
 import argparse
 
-import sys
-
 sys.path.append("../dataset/")
 
 from numpy2midi_mix import numpy2midi
-from dictionary_mix import genre
 from model import CMT
 
 num_songs = 10
@@ -30,10 +25,10 @@ def cal_control_error(err_note_number_list, err_beat_number_list):
 
 def generate():
     # path
-    parser = argparse.ArgumentParser(description="Demo of argparse")
-    parser.add_argument('-c', '--ckpt', default="../exp/loss_8_params.pt")
-    parser.add_argument('-f', '--files', required=True)
-    parser.add_argument('-g', '--gpus')
+    parser = argparse.ArgumentParser(description="Args for generating background music")
+    parser.add_argument('-c', '--ckpt', default="../exp/loss_8_params.pt", help="Model checkpoint to be loaded")
+    parser.add_argument('-f', '--files', required=True, help="Input npz file of a video")
+    parser.add_argument('-g', '--gpus', help="Id of gpu. Only ONE gpu is needed")
     args = parser.parse_args()
     
     if args.gpus is not None:
@@ -73,8 +68,6 @@ def generate():
         start_time = time.time()
         song_time_list = []
         words_len_list = []
-
-        cnt_tokens_all = 0
 
 
         sidx = 0

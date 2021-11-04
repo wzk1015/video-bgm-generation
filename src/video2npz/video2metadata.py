@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import MultipleLocator
 
-from stat_mix import _cal_b_density, _cal_o_density
+from stat_mix import _cal_b_density
 
 
 
@@ -85,9 +85,6 @@ def process_video(video_path, args):
     if args.visualize:
         makedirs('image')
 
-        x = [fpb // 2 + i * fpb for i in range(len(fmpb))]  # 每个bar中间帧的idx
-        y = fmpb
-
         height = vlog.getFrame(0).shape[0]
         thumbnails = [vlog.getFrameFromTime(t)[:, :int(height * 2.5 / 10), :] for t in list(frange(25, 35, 1))]
         thumbnails = np.concatenate(thumbnails, axis=1)
@@ -104,7 +101,6 @@ def process_video(video_path, args):
             x_frame = [i * fpb, (i + 1) * fpb - 1]
             x_time = [x / fps for x in x_frame]
             y_fm = [fm, fm]
-            y_b_dens = [_cal_b_density(fm), _cal_b_density(fm)]
             if i == 0:
                 plt.plot(x_time, y_fm, 'r-', label='Per Bar', lw=3)
             else:
