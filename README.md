@@ -108,7 +108,13 @@ Code for paper *Video Background Music Generation with Controllable Music Transf
   # zzz.mp4: output video
   ````
 
+## Matching Method
 
+- The matching method finds the five most matching music pieces from the music library for a given video.
+
+  ```shell
+  python src/match.py inference/xxx.npz dataset/lpd_5_prcem_mix_v8_10000.npz
+  ```
 
 
 ## Citation
