@@ -2,8 +2,7 @@ import numpy as np
 import torch
 import torch.cuda
 from torch import nn
-
-from utils import Embeddings, BeatPositionalEncoding
+import math
 
 from fast_transformers.builders import TransformerEncoderBuilder
 from fast_transformers.masking import TriangularCausalMask
@@ -65,6 +64,57 @@ def sampling(logit, p=None, t=1.0):
     return cur_word
 
 
+################################################################################
+# Model
+################################################################################
+
+class Embeddings(nn.Module):
+    def __init__(self, n_token, d_model):
+        super(Embeddings, self).__init__()
+        self.lut = nn.Embedding(n_token, d_model)
+        self.d_model = d_model
+
+    def forward(self, x):
+        return self.lut(x) * math.sqrt(self.d_model)
+
+
+class PositionalEncoding(nn.Module):
+    def __init__(self, d_model, dropout=0.1, max_len=20000):
+        super(PositionalEncoding, self).__init__()
+        self.dropout = nn.Dropout(p=dropout)
+
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x):
+        # print(x.shape, self.pe[:, :x.size(1), :].shape)
+        x = x + self.pe[:, :x.size(1), :]
+        return self.dropout(x)
+
+
+class BeatPositionalEncoding(nn.Module):
+    def __init__(self, d_model, dropout=0.1, max_len=20000):
+        super(BeatPositionalEncoding, self).__init__()
+        self.dropout = nn.Dropout(p=dropout)
+
+        pe = torch.zeros(max_len, d_model)
+        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        pe[:, 0::2] = torch.sin(position * div_term)
+        pe[:, 1::2] = torch.cos(position * div_term)
+        pe = pe.unsqueeze(0)
+        self.register_buffer('pe', pe)
+
+    def forward(self, x, index):
+        x = x + self.pe[:, index, :]
+        return self.dropout(x)[0]
+
+
 '''
 last dimension of input data | attribute:
 0: bar/beat
@@ -73,7 +123,7 @@ last dimension of input data | attribute:
 3: pitch
 4: duration
 5: instr
-6: strength onset_density
+6: strength
 7: time_encoding
 '''
 
@@ -111,11 +161,11 @@ class CMT(nn.Module):
 
         self.encoder_emb_barbeat = Embeddings(self.n_token[0], self.emb_sizes[0])
         self.encoder_emb_type = Embeddings(self.n_token[1], self.emb_sizes[1])
-        self.encoder_emb_beat_density = Embeddings(self.n_token[2], self.emb_sizes[2])
+        self.encoder_emb_density = Embeddings(self.n_token[2], self.emb_sizes[2])
         self.encoder_emb_pitch = Embeddings(self.n_token[3], self.emb_sizes[3])
         self.encoder_emb_duration = Embeddings(self.n_token[4], self.emb_sizes[4])
         self.encoder_emb_instr = Embeddings(self.n_token[5], self.emb_sizes[5])
-        self.encoder_emb_onset_density = Embeddings(self.n_token[6], self.emb_sizes[6])
+        self.encoder_emb_strength = Embeddings(self.n_token[6], self.emb_sizes[6])
         self.encoder_emb_time_encoding = Embeddings(self.n_token[7], self.time_encoding_size)
         self.encoder_pos_emb = BeatPositionalEncoding(self.d_model, self.dropout)
 
@@ -140,11 +190,11 @@ class CMT(nn.Module):
         # individual output
         self.proj_barbeat = nn.Linear(self.d_model, self.n_token[0])
         self.proj_type = nn.Linear(self.d_model, self.n_token[1])
-        self.proj_beat_density = nn.Linear(self.d_model, self.n_token[2])
+        self.proj_density = nn.Linear(self.d_model, self.n_token[2])
         self.proj_pitch = nn.Linear(self.d_model, self.n_token[3])
         self.proj_duration = nn.Linear(self.d_model, self.n_token[4])
         self.proj_instr = nn.Linear(self.d_model, self.n_token[5])
-        self.proj_onset_density = nn.Linear(self.d_model, self.n_token[6])
+        self.proj_strength = nn.Linear(self.d_model, self.n_token[6])
 
     def compute_loss(self, predict, target, loss_mask):
         loss = self.loss_func(predict, target)
@@ -183,22 +233,22 @@ class CMT(nn.Module):
         # embeddings
         emb_barbeat = self.encoder_emb_barbeat(x[..., 0])
         emb_type = self.encoder_emb_type(x[..., 1])
-        emb_beat_density = self.encoder_emb_beat_density(x[..., 2])
+        emb_density = self.encoder_emb_density(x[..., 2])
         emb_pitch = self.encoder_emb_pitch(x[..., 3])
         emb_duration = self.encoder_emb_duration(x[..., 4])
         emb_instr = self.encoder_emb_instr(x[..., 5])
-        emb_onset_density = self.encoder_emb_onset_density(x[..., 6])
+        emb_strength = self.encoder_emb_strength(x[..., 6])
         emb_time_encoding = self.encoder_emb_time_encoding(x[..., 7])
 
         embs = torch.cat(
             [
                 emb_barbeat,
                 emb_type,
-                emb_beat_density,
+                emb_density,
                 emb_pitch,
                 emb_duration,
                 emb_instr,
-                emb_onset_density
+                emb_strength
             ], dim=-1)
 
         encoder_emb_linear = self.encoder_in_linear(embs)
@@ -241,14 +291,14 @@ class CMT(nn.Module):
         y_ = self.project_concat_type(y_concat_type)
 
         y_barbeat = self.proj_barbeat(y_)
-        y_beat_density = self.proj_beat_density(y_)
+        y_density = self.proj_density(y_)
         y_pitch = self.proj_pitch(y_)
         y_duration = self.proj_duration(y_)
         y_instr = self.proj_instr(y_)
-        y_onset_density = self.proj_onset_density(y_)
+        y_strength = self.proj_strength(y_)
         # import ipdb;ipdb.set_trace()
 
-        return y_barbeat, y_pitch, y_duration, y_instr, y_onset_density, y_beat_density
+        return y_barbeat, y_pitch, y_duration, y_instr, y_strength, y_density
 
     def forward_output_sampling(self, h, y_type, recurrent=True):
         '''
@@ -275,26 +325,26 @@ class CMT(nn.Module):
         y_pitch = self.proj_pitch(y_)
         y_duration = self.proj_duration(y_)
         y_instr = self.proj_instr(y_)
-        y_onset_density = self.proj_onset_density(y_)
-        y_beat_density = self.proj_beat_density(y_)
+        y_strength = self.proj_strength(y_)
+        y_density = self.proj_density(y_)
 
         # sampling gen_cond
         cur_word_barbeat = sampling(y_barbeat, t=1.2)
         cur_word_pitch = sampling(y_pitch, p=0.9)
         cur_word_duration = sampling(y_duration, t=2, p=0.9)
         cur_word_instr = sampling(y_instr, p=0.90)
-        cur_word_onset_density = sampling(y_onset_density, p=0.90)
-        cur_word_beat_density = sampling(y_beat_density, p=0.90)
+        cur_word_strength = sampling(y_strength, p=0.90)
+        cur_word_density = sampling(y_density, p=0.90)
 
         # collect
         next_arr = np.array([
             cur_word_barbeat,
             cur_word_type,
-            cur_word_beat_density,
+            cur_word_density,
             cur_word_pitch,
             cur_word_duration,
             cur_word_instr,
-            cur_word_onset_density,
+            cur_word_strength,
         ])
         return next_arr
 
@@ -441,14 +491,13 @@ class CMT(nn.Module):
         print(final_res.shape)
         return final_res, err_note_number_list, err_beat_number_list
 
-
     def train_forward(self, **kwargs):
         x = kwargs['x']
         target = kwargs['target']
         loss_mask = kwargs['loss_mask']
         init_token = kwargs['init_token']
         h, y_type = self.forward_hidden(x, memory=None, is_training=True, init_token=init_token)
-        y_barbeat, y_pitch, y_duration, y_instr, y_onset_density, y_beat_density = self.forward_output(h, target)
+        y_barbeat, y_pitch, y_duration, y_instr, y_strength, y_density = self.forward_output(h, target)
 
         # reshape (b, s, f) -> (b, f, s)
         y_barbeat = y_barbeat[:, ...].permute(0, 2, 1)
@@ -456,26 +505,26 @@ class CMT(nn.Module):
         y_pitch = y_pitch[:, ...].permute(0, 2, 1)
         y_duration = y_duration[:, ...].permute(0, 2, 1)
         y_instr = y_instr[:, ...].permute(0, 2, 1)
-        y_onset_density = y_onset_density[:, ...].permute(0, 2, 1)
-        y_beat_density = y_beat_density[:, ...].permute(0, 2, 1)
+        y_strength = y_strength[:, ...].permute(0, 2, 1)
+        y_density = y_density[:, ...].permute(0, 2, 1)
 
         # loss
         loss_barbeat = self.compute_loss(
             y_barbeat, target[..., 0], loss_mask)
         loss_type = self.compute_loss(
             y_type, target[..., 1], loss_mask)
-        loss_beat_density = self.compute_loss(
-            y_beat_density, target[..., 2], loss_mask)
+        loss_density = self.compute_loss(
+            y_density, target[..., 2], loss_mask)
         loss_pitch = self.compute_loss(
             y_pitch, target[..., 3], loss_mask)
         loss_duration = self.compute_loss(
             y_duration, target[..., 4], loss_mask)
         loss_instr = self.compute_loss(
             y_instr, target[..., 5], loss_mask)
-        loss_onset_density = self.compute_loss(
-            y_onset_density, target[..., 6], loss_mask)
+        loss_strength = self.compute_loss(
+            y_strength, target[..., 6], loss_mask)
 
-        return loss_barbeat, loss_type, loss_pitch, loss_duration, loss_instr, loss_onset_density, loss_beat_density
+        return loss_barbeat, loss_type, loss_pitch, loss_duration, loss_instr, loss_strength, loss_density
 
     def forward(self, **kwargs):
         if kwargs['is_train']:

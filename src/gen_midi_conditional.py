@@ -61,7 +61,7 @@ def generate():
         net.load_state_dict(torch.load(path_saved_ckpt, map_location=torch.device('cpu')))
 
     if len(filelist) == 0:
-        raise RuntimeError('no npz file in ' + str(filelist))
+        raise RuntimeError('no npz file in ', args.files)
 
     for file_name in filelist:
         # gen
