@@ -16,6 +16,7 @@ from utils import log, Saver, network_paras
 from model import CMT
 
 
+
 def train_dp():
     parser = argparse.ArgumentParser(description="Args for training CMT")
     parser.add_argument('-n', '--name', default="debug",
@@ -207,6 +208,10 @@ def train_dp():
         elif loss <= 0.001:
             log('Finished')
             return
+
+
+#        else:
+#            saver_agent.save_model(net, name='loss_high')
 
 
 if __name__ == '__main__':

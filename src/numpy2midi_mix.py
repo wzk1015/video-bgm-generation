@@ -13,6 +13,13 @@ INSTRUMENT_PROGRAM = {
 }
 
 
+def test_numpy2midi(idx: int) -> muspy.Music:
+    npz = np.load('lpd_5_ccdepr_mix_v4_10000.npz', allow_pickle=True)
+    decoder = npz['x'][idx]
+    name = npz['metadata'][idx]['id']
+    return numpy2midi(name, decoder)
+
+
 def numpy2midi(name, decoder: np.ndarray) -> muspy.Music:
     muspy_tracks = []
     # Decoder
@@ -46,3 +53,7 @@ def numpy2midi(name, decoder: np.ndarray) -> muspy.Music:
     muspy.write_midi(name + ".mid", muspy_music)
 
     return muspy_music
+
+
+if __name__ == '__main__':
+    test_numpy2midi(idx=66)
