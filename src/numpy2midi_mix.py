@@ -4,13 +4,12 @@ import numpy as np
 from midi2numpy_mix import Note, DECODER_DIMENSION, RESOLUTION
 from dictionary_mix import preset_event2word
 
-
 INSTRUMENT_PROGRAM = {
-    'Drums':    0,  # Acoustic Bass Drum?
-    'Piano':    0,  # Acoustic Grand Piano
-    'Guitar':   24, # Acoustic Guitar (nylon)
-    'Bass':     33, # Electric Bass (finger)
-    'Strings':  41  # Viola
+    'Drums'  : 0,  # Acoustic Bass Drum?
+    'Piano'  : 0,  # Acoustic Grand Piano
+    'Guitar' : 24,  # Acoustic Guitar (nylon)
+    'Bass'   : 33,  # Electric Bass (finger)
+    'Strings': 41  # Viola
 }
 
 
@@ -19,13 +18,14 @@ def test_numpy2midi(idx: int) -> muspy.Music:
     decoder = npz['x'][idx]
     name = npz['metadata'][idx]['id']
     return numpy2midi(name, decoder)
-    
+
+
 def numpy2midi(name, decoder: np.ndarray) -> muspy.Music:
     muspy_tracks = []
     # Decoder
     n_bars = -1
     beat = 0
-    track_notes = {instr_type: [] for instr_type in INSTRUMENT_PROGRAM.keys()} 
+    track_notes = {instr_type: [] for instr_type in INSTRUMENT_PROGRAM.keys()}
     for word in decoder:
         w_type = word[DECODER_DIMENSION['type']]
         if w_type == preset_event2word['type']['M']:
@@ -42,13 +42,13 @@ def numpy2midi(name, decoder: np.ndarray) -> muspy.Music:
             break
     for instr_type, muspy_notes in track_notes.items():
         muspy_tracks.append(muspy.Track(
-            program=INSTRUMENT_PROGRAM[instr_type], 
-            is_drum=(instr_type=='Drums'), 
+            program=INSTRUMENT_PROGRAM[instr_type],
+            is_drum=(instr_type == 'Drums'),
             name=instr_type,
             notes=muspy_notes
         ))
 
-    muspy_music = muspy.Music(resolution=RESOLUTION//4, tracks=muspy_tracks)
+    muspy_music = muspy.Music(resolution=RESOLUTION // 4, tracks=muspy_tracks)
 
     muspy.write_midi(name + ".mid", muspy_music)
 

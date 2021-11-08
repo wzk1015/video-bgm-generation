@@ -9,27 +9,26 @@ import argparse
 
 from dictionary_mix import preset_event2word, preset_word2event
 
-
 #np.random.seed(208)
 
 RESOLUTION = 16  # 每小节16个时间单位
 DECODER_MAX_LEN = 10000
 # DECODER_MAX_LEN = 3000
 DECODER_DIMENSION = {
-    'type':         0,
-    'beat':         1,
-    'b_dens':       2,
-    'pitch':        3,
-    'duration':     4,
-    'instr_type':   5,
-    'o_dens':       6,
-    'i_beat':       7,
-    'n_beat':       8,
-    'p_beat':       9,
-    # 'velocity': 4
+    'type'      : 0,
+    'beat'      : 1,
+    'density'   : 2,
+    'pitch'     : 3,
+    'duration'  : 4,
+    'instr_type': 5,
+    'strength'  : 6,
+    'i_beat'    : 7,
+    'n_beat'    : 8,
+    'p_beat'    : 9,
 }
 N_DECODER_DIMENSION = len(DECODER_DIMENSION)
-KEYS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b']
+KEYS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g',
+        'g#', 'a', 'a#', 'b']
 
 
 class Note:
@@ -78,29 +77,29 @@ class Bar:
         self.n_notes = len(self.notes)
         self.i_bar = i_bar
 
-    def _get_beat_token(self, note, b_dens, o_dens, n_beat: int) -> list:
+    def _get_beat_token(self, note, density, strength, n_beat: int) -> list:
         l = [[0] * N_DECODER_DIMENSION]
         l[0][DECODER_DIMENSION['type']] = preset_event2word['type']['M']
         l[0][DECODER_DIMENSION['beat']] = preset_event2word['beat']['Beat_%d' % note.beat]
-        l[0][DECODER_DIMENSION['b_dens']] = b_dens + 1
+        l[0][DECODER_DIMENSION['density']] = density + 1
         l[0][DECODER_DIMENSION['instr_type']] = preset_event2word['instr_type'][note.instr_type]
-        l[0][DECODER_DIMENSION['o_dens']] = o_dens
+        l[0][DECODER_DIMENSION['strength']] = strength
         l[0][DECODER_DIMENSION['i_beat']] = note.i_beat
         l[0][DECODER_DIMENSION['n_beat']] = n_beat
         l[0][DECODER_DIMENSION['p_beat']] = int(note.i_beat / n_beat * 100)
         return l
 
-    def _get_bar_token(self, b_dens, n_beat: int) -> list:
+    def _get_bar_token(self, density, n_beat: int) -> list:
         l = [[0] * N_DECODER_DIMENSION]
         l[0][DECODER_DIMENSION['type']] = preset_event2word['type']['M']
         l[0][DECODER_DIMENSION['beat']] = preset_event2word['beat']['Bar']
-        l[0][DECODER_DIMENSION['b_dens']] = b_dens + 1
+        l[0][DECODER_DIMENSION['density']] = density + 1
         l[0][DECODER_DIMENSION['i_beat']] = self.i_bar * RESOLUTION
         l[0][DECODER_DIMENSION['n_beat']] = n_beat
         l[0][DECODER_DIMENSION['p_beat']] = int(self.i_bar * RESOLUTION / n_beat * 100)
         return l
 
-    def to_decoder_list(self, n_beat:int) -> list:
+    def to_decoder_list(self, n_beat: int) -> list:
         # 逆序构建
         n_beats = 0
         l = []
@@ -112,7 +111,8 @@ class Bar:
             for note in reversed(self.notes[:-1]):
                 if note.beat != prev_note.beat or note.instr_type != prev_note.instr_type:
                     # add beat token
-                    l = self._get_beat_token(note=prev_note, b_dens=n_beats, o_dens=n_notes_per_beat, n_beat=n_beat) + l
+                    l = self._get_beat_token(note=prev_note, density=n_beats, strength=n_notes_per_beat,
+                                             n_beat=n_beat) + l
                     if note.beat != prev_note.beat:
                         n_beats += 1
                     n_notes_per_beat = 0
@@ -121,10 +121,10 @@ class Bar:
                 n_notes_per_beat += 1
                 prev_note = note
             # add the first beat token
-            l = self._get_beat_token(note=prev_note, b_dens=n_beats, o_dens=n_notes_per_beat, n_beat=n_beat) + l
+            l = self._get_beat_token(note=prev_note, density=n_beats, strength=n_notes_per_beat, n_beat=n_beat) + l
             n_beats += 1
         # add bar token
-        l = self._get_bar_token(b_dens=n_beats, n_beat=n_beat) + l
+        l = self._get_bar_token(density=n_beats, n_beat=n_beat) + l
         return l
 
 
@@ -132,7 +132,7 @@ class MIDI:
     def __init__(self, id: str):
         self.id = id
         self.midi = muspy.read_midi(os.path.join(midi_dir, id + '.mid'))
-        self.midi.adjust_resolution(target=RESOLUTION//4)
+        self.midi.adjust_resolution(target=RESOLUTION // 4)
 
         self.n_beat = self.midi.get_end_time()
         self.n_bars = math.ceil((self.n_beat + 1) / RESOLUTION)
@@ -174,8 +174,7 @@ def midi2numpy(id_list: list):
     decoder_mask = []
     metadata_list = []
     decoder_len = []
-    
-    
+
     for id in tqdm(id_list):
         id_filename = os.path.join(json_dir, id + '.json')
         if os.path.exists(id_filename):
@@ -187,12 +186,10 @@ def midi2numpy(id_list: list):
                 decoder_len.append(de_len)
                 metadata = load_dict['metadata']
         else:
-            
-            
-            
+
             midi = MIDI(id)
             decoder_list, de_mask, de_len = midi.to_decoder_list()
-            
+
             decoder_len.append(de_len)
             if de_len > DECODER_MAX_LEN:
                 continue
@@ -201,13 +198,12 @@ def midi2numpy(id_list: list):
             decoder_list += [[0] * N_DECODER_DIMENSION] * (DECODER_MAX_LEN - de_len)
             de_mask += [0] * (DECODER_MAX_LEN - de_len)
 
-            metadata={'id': id, 'de_len': de_len, 'instruments': midi.instruments, 'genre': "N/A"} 
+            metadata = {'id': id, 'de_len': de_len, 'instruments': midi.instruments, 'genre': "N/A"}
             ##### genre set to empty
 
             dic = {'decoder_list': decoder_list, 'de_mask': de_mask, 'de_len': de_len, 'metadata': metadata}
             with open(id_filename, 'w') as f:
                 json.dump(dic, f)
-
 
         decoder.append(decoder_list)
         decoder_mask.append(de_mask)
@@ -226,16 +222,14 @@ def midi2numpy(id_list: list):
 
 
 if __name__ == '__main__':
-    
     parser = argparse.ArgumentParser()
     parser.add_argument("--midi_dir", default="../../lpd_5_cleansed_midi/", required=True)
     parser.add_argument("--out_name", default="data.npz", required=True)
     args = parser.parse_args()
-    
+
     midi_dir = args.midi_dir
     npz_filename = os.path.join("../dataset/", args.out_name)
     json_dir = os.path.join("../dataset/json/")
-    
+
     id_list = [name.strip(".mid").strip(".midi") for name in os.listdir(midi_dir) if ".mid" in name]
     midi2numpy(id_list)
-    

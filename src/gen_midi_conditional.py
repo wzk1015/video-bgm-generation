@@ -30,7 +30,7 @@ def generate():
     parser.add_argument('-f', '--files', required=True, help="Input npz file of a video")
     parser.add_argument('-g', '--gpus', help="Id of gpu. Only ONE gpu is needed")
     args = parser.parse_args()
-    
+
     if args.gpus is not None:
         if not args.gpus.isnumeric():
             raise RuntimeError('Only 1 GPU is needed for inference')
@@ -69,7 +69,6 @@ def generate():
         song_time_list = []
         words_len_list = []
 
-
         sidx = 0
 
         while sidx < num_songs:
@@ -77,12 +76,12 @@ def generate():
                 print("new song")
                 start_time = time.time()
                 vlog_npz = np.load(file_name)['input']
-                
+
                 vlog_npz = vlog_npz[vlog_npz[:, 2] != 1]
                 print(vlog_npz)
 
                 res, err_note_number_list, err_beat_number_list = net(is_train=False, vlog=vlog_npz, C=0.7)
-                
+
                 cal_control_error(err_note_number_list, err_beat_number_list)
 
                 numpy2midi(f"{file_name}_{sidx}", res[:, [1, 0, 2, 3, 4, 5, 6]].astype(np.int32))
@@ -101,4 +100,3 @@ def generate():
 if __name__ == '__main__':
     print("inference")
     generate()
-    

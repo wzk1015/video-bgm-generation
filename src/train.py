@@ -1,29 +1,35 @@
 import sys
 import datetime
 import argparse
+import os
+import time
+
+import numpy as np
+import torch
 from torch import optim
 from torch.nn.utils import clip_grad_norm_
 
 sys.path.append(".")
 
 import utils
-from utils import *
+from utils import log, Saver, network_paras
 from model import CMT
-
 
 
 
 def train_dp():
     parser = argparse.ArgumentParser(description="Args for training CMT")
-    parser.add_argument('-n', '--name', default="debug", help="Name of the experiment, also the log file and checkpoint directory. If 'debug', checkpoints won't be saved")
+    parser.add_argument('-n', '--name', default="debug",
+                        help="Name of the experiment, also the log file and checkpoint directory. If 'debug', checkpoints won't be saved")
     parser.add_argument('-l', '--lr', default=0.0001, help="Initial learning rate")
     parser.add_argument('-b', '--batch_size', default=6, help="Batch size")
     parser.add_argument('-p', '--path', help="If set, load model from the given path")
     parser.add_argument('-e', '--epochs', default=200, help="Num of epochs")
-    parser.add_argument('-t', '--train_data', default='../dataset/lpd_5_prcem_mix_v8_10000.npz', help="Path of the training data (.npz file)")
+    parser.add_argument('-t', '--train_data', default='../dataset/lpd_5_prcem_mix_v8_10000.npz',
+                        help="Path of the training data (.npz file)")
     parser.add_argument('-g', '--gpus', type=int, nargs='+', help="Ids of gpu")
     args = parser.parse_args()
-    
+
     if args.gpus is None:
         os.environ['CUDA_VISIBLE_DEVICES'] = ",".join([str(g) for g in list(range(torch.cuda.device_count()))])
     else:
@@ -32,16 +38,15 @@ def train_dp():
     path_train_data = args.train_data
 
     init_lr = float(args.lr)
-    
+
     batch_size = int(args.batch_size)
-    
+
     DEBUG = args.name == "debug"
 
     params = {
         "DECAY_EPOCH": [],
         "DECAY_RATIO": 0.1,
     }
-
 
     log("name:", args.name)
     log("args", args)
@@ -66,21 +71,19 @@ def train_dp():
         total = m["de_len"] - 1
         train_x[i, :total, 7] = train_x[i, :total, 7] + 1
 
-
     init_token = np.zeros((train_x.shape[0], 7, 3), dtype=np.int32)
 
     num_batch = len(train_x) // batch_size
-
 
     # create saver
     saver_agent = Saver(exp_dir="../exp/" + args.name, debug=DEBUG)
 
     decoder_n_class = np.max(train_x, axis=(0, 1)) + 1
     init_n_class = np.max(init_token, axis=(0, 1)) + 1
-    
-#    decoder_n_class = [18, 3, 18, 129, 18, 6, 20, 102, 5025]
-#    init_n_class = [7, 1, 6]
-    
+
+    #    decoder_n_class = [18, 3, 18, 129, 18, 6, 20, 102, 5025]
+    #    init_n_class = [7, 1, 6]
+
     # log
     log('num of encoder classes:', decoder_n_class, init_n_class)
 
@@ -168,7 +171,7 @@ def train_dp():
 
             # print
             sys.stdout.write(
-                '{}/{} | Loss: {:.3f} | barbeat {:.3f}, type {:.3f}, pitch {:.3f}, duration {:.3f}, instr {:.3f}, o_den {:.3f}, b_den {:.3f}\r'.format(
+                '{}/{} | Loss: {:.3f} | barbeat {:.3f}, type {:.3f}, pitch {:.3f}, duration {:.3f}, instr {:.3f}, strength {:.3f}, density {:.3f}\r'.format(
                     bidx, num_batch, float(loss), losses[0], losses[1], losses[2], losses[3], losses[4], losses[5],
                     losses[6]))
             sys.stdout.flush()
@@ -187,7 +190,7 @@ def train_dp():
         log('-' * 80)
         log(time.ctime() + ' epoch: {}/{} | Loss: {:.3f} | time: {}'.format(
             epoch, n_epoch, epoch_loss, str(datetime.timedelta(seconds=runtime))))
-        each_loss_str = 'barbeat {:.3f}, type {:.3f}, pitch {:.3f}, duration {:.3f}, instr {:.3f}, o_den {:.3f}, b_den {:.3f}\r'.format(
+        each_loss_str = 'barbeat {:.3f}, type {:.3f}, pitch {:.3f}, duration {:.3f}, instr {:.3f}, strength {:.3f}, density {:.3f}\r'.format(
             acc_losses[0], acc_losses[1], acc_losses[2], acc_losses[3], acc_losses[4], acc_losses[5], acc_losses[6])
         log('each loss > ' + each_loss_str)
 
@@ -205,10 +208,11 @@ def train_dp():
         elif loss <= 0.001:
             log('Finished')
             return
+
+
 #        else:
 #            saver_agent.save_model(net, name='loss_high')
 
 
 if __name__ == '__main__':
     train_dp()
-    

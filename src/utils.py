@@ -98,6 +98,7 @@ class PositionalEncoding(nn.Module):
         x = x + self.pe[:, :x.size(1), :]
         return self.dropout(x)
 
+
 class BeatPositionalEncoding(nn.Module):
     def __init__(self, d_model, dropout=0.1, max_len=20000):
         super(BeatPositionalEncoding, self).__init__()
@@ -208,13 +209,10 @@ class Saver(object):
         self.global_step += 1
 
 
-
-
 def make_loss_report(
         path_log,
         path_figure='loss.png',
         dpi=100):
-
     # load logfile
     monitor_vals = collections.defaultdict(list)
     with open(path_log, 'r') as f:
@@ -248,9 +246,7 @@ def make_loss_report(
     plt.savefig(path_figure)
 
 
-
 def log(*args, **kwargs):
     print(*args, **kwargs)
     if flog is not None:
         print(*args, file=flog, flush=True)
-

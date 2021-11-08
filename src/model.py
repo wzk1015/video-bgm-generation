@@ -1,10 +1,12 @@
+import numpy as np
+import torch
 import torch.cuda
+from torch import nn
 
-from utils import *
+from utils import Embeddings, BeatPositionalEncoding
 
 from fast_transformers.builders import TransformerEncoderBuilder
 from fast_transformers.masking import TriangularCausalMask
-
 
 D_MODEL = 512
 N_LAYER_ENCODER = 12
@@ -62,6 +64,7 @@ def sampling(logit, p=None, t=1.0):
         cur_word = weighted_sampling(probs)
     return cur_word
 
+
 '''
 last dimension of input data | attribute:
 0: bar/beat
@@ -73,6 +76,7 @@ last dimension of input data | attribute:
 6: strength onset_density
 7: time_encoding
 '''
+
 
 class CMT(nn.Module):
     def __init__(self, n_token, init_n_token, is_training=True):
@@ -119,7 +123,6 @@ class CMT(nn.Module):
         self.encoder_in_linear = nn.Linear(int(np.sum(self.emb_sizes)), self.d_model)
         self.encoder_time_linear = nn.Linear(int(self.time_encoding_size), self.d_model)
 
-
         self.transformer_encoder = TransformerEncoderBuilder.from_kwargs(
             n_layers=self.n_layer_encoder,
             n_heads=self.n_head,
@@ -130,8 +133,6 @@ class CMT(nn.Module):
             dropout=0.1,
             attention_type="causal-linear",
         ).get()
-
-
 
         # blend with type
         self.project_concat_type = nn.Linear(self.d_model + 32, self.d_model)
@@ -145,18 +146,11 @@ class CMT(nn.Module):
         self.proj_instr = nn.Linear(self.d_model, self.n_token[5])
         self.proj_onset_density = nn.Linear(self.d_model, self.n_token[6])
 
-    def get_encoder_builder(self):
-        raise NotImplementedError
-
-    def get_decoder_builder(self):
-        raise NotImplementedError
-
     def compute_loss(self, predict, target, loss_mask):
         loss = self.loss_func(predict, target)
         loss = loss * loss_mask
         loss = torch.sum(loss) / torch.sum(loss_mask)
         return loss
-
 
     def forward_init_token_vis(self, x, memory=None, is_training=True):
         emb_genre = self.init_emb_genre(x[..., 0])
@@ -256,8 +250,6 @@ class CMT(nn.Module):
 
         return y_barbeat, y_pitch, y_duration, y_instr, y_onset_density, y_beat_density
 
-
-
     def forward_output_sampling(self, h, y_type, recurrent=True):
         '''
         for inference
@@ -306,10 +298,9 @@ class CMT(nn.Module):
         ])
         return next_arr
 
-
     def inference_from_scratch(self, **kwargs):
-        vlog=kwargs['vlog']
-        C=kwargs['C']
+        vlog = kwargs['vlog']
+        C = kwargs['C']
 
         def get_p_beat(cur_bar, cur_beat, n_beat):
             all_beat = cur_bar * 16 + cur_beat - 1
@@ -317,11 +308,11 @@ class CMT(nn.Module):
             return p_beat
 
         dictionary = {'bar': 17}
-        o_den_track_list=[1, 2, 3]
+        strength_track_list = [1, 2, 3]
 
         pre_init = np.array([
-            [5, 0, 0],  
-            [0, 0, 0], 
+            [5, 0, 0],
+            [0, 0, 0],
             [0, 0, 1],
             [0, 0, 2],
             [0, 0, 3],
@@ -402,20 +393,17 @@ class CMT(nn.Module):
                         flag = (np.random.rand() < C)
                         if next_arr[0] == dictionary['bar']:
                             cur_density = 1
-                    if True:
-                        next_arr = np.array(
-                            [vlog_i[0], 1, cur_density, 0, 0, o_den_track_list[cur_track], vlog_i[2] + 0])
-                        replace = True
-                        acc_note_num = vlog_i[2] + 0
-                        note_num = 0
-                        cur_track += 1
-                        if cur_track >= len(o_den_track_list):
-                            cur_track = 0
-                            cur_vlog += 1
-                    else:
-                        print("replace denied----")
-                        cur_vlog += 1
+
+                    next_arr = np.array(
+                        [vlog_i[0], 1, cur_density, 0, 0, strength_track_list[cur_track], vlog_i[2] + 0])
+                    replace = True
+                    acc_note_num = vlog_i[2] + 0
+                    note_num = 0
+                    cur_track += 1
+                    if cur_track >= len(strength_track_list):
                         cur_track = 0
+                        cur_vlog += 1
+
                 if next_arr[1] == 1:
                     beat_num[next_arr[0]] = 1
                 elif next_arr[1] == 2 and replace == True:
@@ -448,25 +436,17 @@ class CMT(nn.Module):
                     print("EOS predicted")
                     break
 
-
-
         print('\n--------[Done]--------')
         final_res = np.concatenate(final_res)
         print(final_res.shape)
         return final_res, err_note_number_list, err_beat_number_list
 
 
-    def forward(self, **kwargs):
-        if kwargs['is_train']:
-            return self.train_forward(**kwargs)
-        return self.inference_from_scratch(**kwargs)
-
-
     def train_forward(self, **kwargs):
-        x=kwargs['x']
-        target=kwargs['target']
-        loss_mask=kwargs['loss_mask']
-        init_token=kwargs['init_token']
+        x = kwargs['x']
+        target = kwargs['target']
+        loss_mask = kwargs['loss_mask']
+        init_token = kwargs['init_token']
         h, y_type = self.forward_hidden(x, memory=None, is_training=True, init_token=init_token)
         y_barbeat, y_pitch, y_duration, y_instr, y_onset_density, y_beat_density = self.forward_output(h, target)
 
@@ -496,4 +476,8 @@ class CMT(nn.Module):
             y_onset_density, target[..., 6], loss_mask)
 
         return loss_barbeat, loss_type, loss_pitch, loss_duration, loss_instr, loss_onset_density, loss_beat_density
-    
+
+    def forward(self, **kwargs):
+        if kwargs['is_train']:
+            return self.train_forward(**kwargs)
+        return self.inference_from_scratch(**kwargs)

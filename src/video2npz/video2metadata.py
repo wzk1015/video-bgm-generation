@@ -13,9 +13,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import MultipleLocator
 
-from stat_mix import _cal_b_density
-
-
 
 def makedirs(d):
     if not osp.exists(d):

@@ -56,7 +56,7 @@ def _get_density_and_strength_from_npz(npz):
 
 def cal_matchness(midi_npz, v_density, v_strength):
     m_density, m_strength = _get_density_and_strength_from_npz(midi_npz)
-    
+
     n_bar = min(v_density.shape[0], m_density.shape[0])
     v_density = v_density[:n_bar]
     v_strength = v_strength[:n_bar]
