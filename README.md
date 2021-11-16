@@ -65,9 +65,9 @@ Code for paper *Video Background Music Generation with Controllable Music Transf
 
   4. train the model
 
-    ```shell
-    python train.py --name train_exp --gpus 0 1 2 3
-    ```
+      ```shell
+      python train.py --name train_exp --gpus 0 1 2 3
+      ```
 
 
 - **Note:** If you want to train with another dataset, please ensure that each track belongs to one of the five instruments (Drums, Piano, Guitar, Bass, or Strings) and is named exactly with its instrument. You can check this with [Muspy](https://salu133445.github.io/muspy/):
