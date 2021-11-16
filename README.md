@@ -4,10 +4,6 @@ Code for paper *Video Background Music Generation with Controllable Music Transf
 
 [[Paper]](https://wzk1015.github.io/cmt/paper.pdf) [[Project Page]](https://wzk1015.github.io/cmt/) [[Bibtex]](https://wzk1015.github.io/cmt/cmt.bib)
 
-
-
-
-
 ## Directory Structure
 
 * `src/`: code of the whole pipeline
@@ -24,8 +20,6 @@ Code for paper *Video Background Music Generation with Controllable Music Transf
 * `exp/`: checkpoints, named after val loss (e.g. `loss_8_params.pt`)
 
 * `inference/`: processed video for inference (.npz), and generated music(.mid) 
-
-
 
 
 ## Preparation
@@ -51,23 +45,39 @@ Code for paper *Video Background Music Generation with Controllable Music Transf
     
   * open `visbeat` package directory (e.g. `anaconda3/envs/XXXX/lib/python2.7/site-packages/visbeat`), replace the original `Video_CV.py` with `src/video2npz/Video_CV.py`
 
-
-
 ## Training
 
-* If you want to use another training set:  convert training data from midi into npz under `dataset/`
+* If you want to reproduce the whole process:
 
-  ```shell
-  python midi2numpy_mix.py --midi_dir /PATH/TO/MIDIS/ --out_name data.npz 
+  1. Download the lpd-5-cleansed dataset from [HERE](https://drive.google.com/uc?id=1yz0Ma-6cWTl6mhkrLnAVJ7RNzlQRypQ5) and put the extracted files under `dataset/lpd_5_cleansed/`
+
+  2. Go to `src/` and convert the pianoroll files (.npz) to midi files:
+
+     ```shell
+     python pianoroll2midi.py --in_dir ../dataset/lpd_5_cleansed/ --out_dir ../dataset/lpd_5_cleansed_midi/
+     ```
+
+  3. Convert midi files to .npz files with our proposed representation:
+
+       ```shell
+       python midi2numpy_mix.py --midi_dir ../dataset/lpd_5_cleansed_midi/ --out_name data.npz 
+       ```
+
+  4. train the model
+
+    ```shell
+    python train.py --name train_exp --gpus 0 1 2 3
+    ```
+
+
+- **Note:** If you want to train with another dataset, please ensure that each track belongs to one of the five instruments (Drums, Piano, Guitar, Bass, or Strings) and is named exactly with its instrument. You can check this with [Muspy](https://salu133445.github.io/muspy/):
+
+  ```python
+  import muspy
+  
+  midi = muspy.read_midi('xxx.mid')
+  print([track.name for track in midi.tracks]) # Should be like ['Drums', 'Guitar', 'Bass', 'Strings']
   ```
-
-* train the model
-
-  ```shell
-  python train.py -n XXX -g 0 1 2 3
-  ```
-
-
 
 ## Inference
 
@@ -115,7 +125,6 @@ Code for paper *Video Background Music Generation with Controllable Music Transf
   ```shell
   python src/match.py inference/xxx.npz dataset/lpd_5_prcem_mix_v8_10000.npz
   ```
-
 
 ## Citation
 
