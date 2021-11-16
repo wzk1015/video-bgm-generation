@@ -49,15 +49,15 @@ Code for paper *Video Background Music Generation with Controllable Music Transf
 
 * If you want to reproduce the whole process:
 
-  1. Download the lpd-5-cleansed dataset from [HERE](https://drive.google.com/uc?id=1yz0Ma-6cWTl6mhkrLnAVJ7RNzlQRypQ5) and put the extracted files under `dataset/lpd_5_cleansed/`
+  1. download the lpd-5-cleansed dataset from [HERE](https://drive.google.com/uc?id=1yz0Ma-6cWTl6mhkrLnAVJ7RNzlQRypQ5) and put the extracted files under `dataset/lpd_5_cleansed/`
 
-  2. Go to `src/` and convert the pianoroll files (.npz) to midi files:
+  2. go to `src/` and convert the pianoroll files (.npz) to midi files:
 
      ```shell
      python pianoroll2midi.py --in_dir ../dataset/lpd_5_cleansed/ --out_dir ../dataset/lpd_5_cleansed_midi/
      ```
 
-  3. Convert midi files to .npz files with our proposed representation:
+  3. convert midi files to .npz files with our proposed representation:
 
        ```shell
        python midi2numpy_mix.py --midi_dir ../dataset/lpd_5_cleansed_midi/ --out_name data.npz 
