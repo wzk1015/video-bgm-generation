@@ -25,21 +25,25 @@ Official code for our paper *Video Background Music Generation with Controllable
 ## Preparation
 
 * clone this repo
-* download `lpd_5_prcem_mix_v8_10000.npz`  from [HERE](https://drive.google.com/file/d/1MWnwwAdOrjC31dSy8kfyxHwv35wK0pQh/view?usp=sharing) and put it under `dataset/` 
+* download the processed data `lpd_5_prcem_mix_v8_10000.npz`  from [HERE](https://drive.google.com/file/d/1MWnwwAdOrjC31dSy8kfyxHwv35wK0pQh/view?usp=sharing) and put it under `dataset/` 
 
-* download pretrained model `loss_8_params.pt` from [HERE](https://drive.google.com/file/d/1Ud2-GXEr4PbRDDe-FZJwzqqZrbbWFxM-/view?usp=sharing) and put it under `exp/` 
+* download the pretrained model `loss_8_params.pt` from [HERE](https://drive.google.com/file/d/1Ud2-GXEr4PbRDDe-FZJwzqqZrbbWFxM-/view?usp=sharing) and put it under `exp/` 
 
 * install `ffmpeg=3.2.4` 
 
 * prepare a Python3 conda environment
 
   ```shell
+  conda create -n mm21_py3 python=3.7
+  conda activate mm21_py3
   pip install -r py3_requirements.txt
   ```
   
 * prepare a Python2 conda environment (for extracting visbeat)
 
   * ````shell
+    conda create -n mm21_py2 python=2.7
+    conda activate mm21_py2
     pip install -r py2_requirements.txt
     ````
     
@@ -47,68 +51,71 @@ Official code for our paper *Video Background Music Generation with Controllable
 
 ## Training
 
+**Note:** use the `mm21_py3` environment: `conda activate mm21_py3`
+
+- A quick start using the processed data `lpd_5_prcem_mix_v8_10000.npz` (1~2 days on 8x 1080Ti GPUs):
+
+  ```shell
+  python train.py --name train_default -b 8 --gpus 0 1 2 3 4 5 6 7
+  ```
+
 * If you want to reproduce the whole process:
 
   1. download the lpd-5-cleansed dataset from [HERE](https://drive.google.com/uc?id=1yz0Ma-6cWTl6mhkrLnAVJ7RNzlQRypQ5) and put the extracted files under `dataset/lpd_5_cleansed/`
 
-  2. go to `src/` and convert the pianoroll files (.npz) to midi files:
+  2. go to `src/` and convert the pianoroll files (.npz) to midi files (~3 files / sec):
 
      ```shell
      python pianoroll2midi.py --in_dir ../dataset/lpd_5_cleansed/ --out_dir ../dataset/lpd_5_cleansed_midi/
      ```
 
-  3. convert midi files to .npz files with our proposed representation:
+  3. convert midi files to .npz files with our proposed representation (~5 files / sec):
 
        ```shell
        python midi2numpy_mix.py --midi_dir ../dataset/lpd_5_cleansed_midi/ --out_name data.npz 
        ```
 
-  4. train the model
+  4. train the model (1~2 days on 8x 1080Ti GPUs):
 
       ```shell
-      python train.py --name train_exp --gpus 0 1 2 3
+      python train.py --name train_exp --train_data ../dataset/data.npz -b 8 --gpus 0 1 2 3 4 5 6 7
       ```
 
+**Note:** If you want to train with another MIDI dataset, please ensure that each track belongs to one of the five instruments (Drums, Piano, Guitar, Bass, or Strings) and is named exactly with its instrument. You can check this with [Muspy](https://salu133445.github.io/muspy/):
 
-- **Note:** If you want to train with another dataset, please ensure that each track belongs to one of the five instruments (Drums, Piano, Guitar, Bass, or Strings) and is named exactly with its instrument. You can check this with [Muspy](https://salu133445.github.io/muspy/):
+```python
+import muspy
 
-  ```python
-  import muspy
-  
-  midi = muspy.read_midi('xxx.mid')
-  print([track.name for track in midi.tracks]) # Should be like ['Drums', 'Guitar', 'Bass', 'Strings']
-  ```
+midi = muspy.read_midi('xxx.mid')
+print([track.name for track in midi.tracks]) # Should be like ['Drums', 'Guitar', 'Bass', 'Strings']
+```
 
 ## Inference
 
-* convert input video (MP4 format) into npz (use the **Python2** environment)
+* convert input video (MP4 format) into npz (use the `mm21_py2` environment):
 
   ```shell
+  conda activate mm21_py2
   cd src/video2npz
   sh video2npz.sh ../../videos/xxx.mp4
   ```
   
   * try resizing the video if this takes a long time
   
-  
-  
-* run model to generate `.mid` : 
+* run model to generate `.mid` (use the `mm21_py3` environment) : 
 
   ```shell
+  conda activate mm21_py3
   python gen_midi_conditional.py -f "../inference/xxx.npz" -c "../exp/loss_8_params.pt"
   ```
   
   * if using another training set, change `decoder_n_class` in `gen_midi_conditional` to the `decoder_n_class` in `train.py`
   
-  
-
 * convert midi into audio: use GarageBand (recommended) or midi2audio 
 
   * set tempo to the value of  `tempo` in `video2npz/metadata.json` 
 
-  
-
-* combine original video and audio into video with BGM
+* combine original video and audio into video with BGM:
 
   ````shell
   ffmpeg -i 'xxx.mp4' -i 'yyy.mp3' -c:v copy -c:a aac -strict experimental -map 0:v:0 -map 1:a:0 'zzz.mp4'
@@ -120,9 +127,10 @@ Official code for our paper *Video Background Music Generation with Controllable
 
 ## Matching Method
 
-- The matching method finds the five most matching music pieces from the music library for a given video.
+- The matching method finds the five most matching music pieces from the music library for a given video (use the `mm21_py3` environment).
 
   ```shell
+  conda activate mm21_py3
   python src/match.py inference/xxx.npz dataset/lpd_5_prcem_mix_v8_10000.npz
   ```
 
