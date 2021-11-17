@@ -1,8 +1,8 @@
 # Controllable Music Transformer
 
-Code for paper *Video Background Music Generation with Controllable Music Transformer* (ACM MM 2021 Best Paper Award) 
+Official code for our paper *Video Background Music Generation with Controllable Music Transformer* (ACM MM 2021 Best Paper Award) 
 
-[[Paper]](https://wzk1015.github.io/cmt/paper.pdf) [[Project Page]](https://wzk1015.github.io/cmt/) [[Bibtex]](https://wzk1015.github.io/cmt/cmt.bib)
+[[Paper]](https://arxiv.org/abs/2111.08380) [[Project Page]](https://wzk1015.github.io/cmt/) [[Bibtex]](https://wzk1015.github.io/cmt/cmt.bib)
 
 ## Directory Structure
 
