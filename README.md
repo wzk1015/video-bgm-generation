@@ -4,6 +4,16 @@ Official code for our paper *Video Background Music Generation with Controllable
 
 [[Paper]](https://arxiv.org/abs/2111.08380) [[Project Page]](https://wzk1015.github.io/cmt/) [[Bibtex]](https://wzk1015.github.io/cmt/cmt.bib)
 
+
+
+## Introduction
+
+We address the unexplored task – *video background music generation*. We first establish three rhythmic relations between video and background music. We then propose a **C**ontrollable **M**usic **T**ransformer (CMT) to achieve local and global control of the music generation process. Our proposed method does not require paired video and music data for training while generates melodious and compatible music with the given video. 
+
+![](https://raw.githubusercontent.com/wzk1015/wzk1015.github.io/master/cmt/img/head.png)
+
+
+
 ## Directory Structure
 
 * `src/`: code of the whole pipeline
