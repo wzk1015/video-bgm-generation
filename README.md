@@ -43,11 +43,13 @@ We address the unexplored task – *video background music generation*. We first
 
 * prepare a Python3 conda environment
 
-  ```shell
-  conda create -n mm21_py3 python=3.7
-  conda activate mm21_py3
-  pip install -r py3_requirements.txt
-  ```
+  * ```shell
+    conda create -n mm21_py3 python=3.7
+    conda activate mm21_py3
+    pip install -r py3_requirements.txt
+    ```
+  * choose the correct version of `torch` and `pytorch-fast-transformers` based on your CUDA version (see [1](https://github.com/idiap/fast-transformers), [2](https://github.com/wzk1015/video-bgm-generation/issues/3))
+
   
 * prepare a Python2 conda environment (for extracting visbeat)
 
@@ -119,11 +121,11 @@ print([track.name for track in midi.tracks]) # Should be like ['Drums', 'Guitar'
   python gen_midi_conditional.py -f "../inference/xxx.npz" -c "../exp/loss_8_params.pt"
   ```
   
-  * if using another training set, change `decoder_n_class` in `gen_midi_conditional` to the `decoder_n_class` in `train.py`
+  * if using another training set, change `decoder_n_class` and `init_n_class` in `gen_midi_conditional` to the ones in `train.py`
   
 * convert midi into audio: use GarageBand (recommended) or midi2audio 
 
-  * set tempo to the value of  `tempo` in `video2npz/metadata.json` 
+  * set tempo to the value of  `tempo` in `video2npz/metadata.json` (generated when running `video2npz.sh`)
 
 * combine original video and audio into video with BGM:
 
@@ -156,9 +158,9 @@ print([track.name for track in midi.tracks]) # Should be like ['Drums', 'Guitar'
 }
 ```
 
+## Acknowledgements
 
-
-
+Our code is based on [Compound Word Transformer](https://github.com/YatingMusic/compound-word-transformer).
 
 
 
