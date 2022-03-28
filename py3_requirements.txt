@@ -1,7 +1,7 @@
-tqdm==4.59.0
+tqdm
 h5py==2.10.0
 matplotlib==3.3.4
-numpy==1.20.1
+numpy
 miditoolkit==0.1.15
 muspy==0.4.0
 scikit_learn==1.0
