@@ -2,7 +2,7 @@
 
 Official code for our paper *Video Background Music Generation with Controllable Music Transformer* (ACM MM 2021 Best Paper Award) 
 
-[[Paper]](https://arxiv.org/abs/2111.08380) [[Project Page]](https://wzk1015.github.io/cmt/) [[Bibtex]](https://wzk1015.github.io/cmt/cmt.bib)
+[[Paper]](https://arxiv.org/abs/2111.08380) [[Demos]](https://wzk1015.github.io/cmt/) [[Bibtex]](https://wzk1015.github.io/cmt/cmt.bib)
 
 
 
@@ -48,7 +48,7 @@ We address the unexplored task – *video background music generation*. We first
     conda activate mm21_py3
     pip install -r py3_requirements.txt
     ```
-  * choose the correct version of `torch` and `pytorch-fast-transformers` based on your CUDA version (see [1](https://github.com/idiap/fast-transformers), [2](https://github.com/wzk1015/video-bgm-generation/issues/3))
+  * choose the correct version of `torch` and `pytorch-fast-transformers` based on your CUDA version (see [fast-trainsformers repo](https://github.com/idiap/fast-transformers) and [this issue](https://github.com/wzk1015/video-bgm-generation/issues/3))
 
   
 * prepare a Python2 conda environment (for extracting visbeat)
@@ -109,19 +109,18 @@ print([track.name for track in midi.tracks]) # Should be like ['Drums', 'Guitar'
   ```shell
   conda activate mm21_py2
   cd src/video2npz
+  # try resizing the video if this takes a long time
   sh video2npz.sh ../../videos/xxx.mp4
   ```
-  
-  * try resizing the video if this takes a long time
   
 * run model to generate `.mid` (use the `mm21_py3` environment) : 
 
   ```shell
   conda activate mm21_py3
   python gen_midi_conditional.py -f "../inference/xxx.npz" -c "../exp/loss_8_params.pt"
-  ```
   
-  * if using another training set, change `decoder_n_class` and `init_n_class` in `gen_midi_conditional` to the ones in `train.py`
+  # if using another training set, change `decoder_n_class` and `init_n_class` in `gen_midi_conditional` to the ones in `train.py`
+  ```
   
 * convert midi into audio: use GarageBand (recommended) or midi2audio 
 
