@@ -71,7 +71,7 @@ def train_dp():
         total = m["de_len"] - 1
         train_x[i, :total, 7] = train_x[i, :total, 7] + 1
 
-    init_token = np.array([
+    init_token = np.tile(np.array([
             [5, 0, 0],
             [0, 0, 0],
             [0, 0, 1],
@@ -79,7 +79,7 @@ def train_dp():
             [0, 0, 3],
             [0, 0, 4],
             [0, 0, 5],
-        ])
+        ]), (train_x.shape[0], 1, 1))
 
     num_batch = len(train_x) // batch_size
 
