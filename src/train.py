@@ -71,7 +71,15 @@ def train_dp():
         total = m["de_len"] - 1
         train_x[i, :total, 7] = train_x[i, :total, 7] + 1
 
-    init_token = np.zeros((train_x.shape[0], 7, 3), dtype=np.int32)
+    init_token = np.array([
+            [5, 0, 0],
+            [0, 0, 0],
+            [0, 0, 1],
+            [0, 0, 2],
+            [0, 0, 3],
+            [0, 0, 4],
+            [0, 0, 5],
+        ])
 
     num_batch = len(train_x) // batch_size
 
@@ -79,7 +87,7 @@ def train_dp():
     saver_agent = Saver(exp_dir="../exp/" + args.name, debug=DEBUG)
 
     decoder_n_class = np.max(train_x, axis=(0, 1)) + 1
-    init_n_class = np.max(init_token, axis=(0, 1)) + 1
+    init_n_class = [7, 1, 6]
 
     #    decoder_n_class = [18, 3, 18, 129, 18, 6, 20, 102, 5025]
     #    init_n_class = [7, 1, 6]
