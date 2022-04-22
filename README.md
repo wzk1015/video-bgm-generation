@@ -119,7 +119,7 @@ print([track.name for track in midi.tracks]) # Should be like ['Drums', 'Guitar'
   conda activate mm21_py3
   python gen_midi_conditional.py -f "../inference/xxx.npz" -c "../exp/loss_8_params.pt"
   
-  # if using another training set, change `decoder_n_class` and `init_n_class` in `gen_midi_conditional` to the ones in `train.py`
+  # if using another training set, change `decoder_n_class` in `gen_midi_conditional` to the one in `train.py`
   ```
   
 * convert midi into audio: use GarageBand (recommended) or midi2audio 
