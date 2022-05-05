@@ -1,0 +1,82 @@
+{
+    "a_info": {
+        "AObjectType": "VideoSource",
+        "base_path": null,
+        "directory_path": "./VisBeatAssets/VideoSources/wzk_vlog_beat_enhance1_track1238",
+        "file_base_name": "VideoSource",
+        "file_ext": ".json",
+        "file_name": "VideoSource.json",
+        "file_path": "./VisBeatAssets/VideoSources/wzk_vlog_beat_enhance1_track1238/VideoSource.json",
+        "source_type": "file"
+    },
+    "directories": {
+        "backup": "./VisBeatAssets/VideoSources/wzk_vlog_beat_enhance1_track1238/Data/Backups/",
+        "data": "./VisBeatAssets/VideoSources/wzk_vlog_beat_enhance1_track1238/Data/",
+        "features": "./VisBeatAssets/VideoSources/wzk_vlog_beat_enhance1_track1238/Data/Features/",
+        "temp": "./VisBeatAssets/VideoSources/wzk_vlog_beat_enhance1_track1238/Data/TEMP/",
+        "versions": "./VisBeatAssets/VideoSources/wzk_vlog_beat_enhance1_track1238/Versions/",
+        "warps": "./VisBeatAssets/VideoSources/wzk_vlog_beat_enhance1_track1238/Versions/Warps/"
+    },
+    "source_location": "./VisBeatAssets/VideoSources/wzk_vlog_beat_enhance1_track1238/Versions//Source/Full/wzk_vlog_beat_enhance1_track1238.mp4",
+    "versions_info": {
+        "Original": {
+            "360": {
+                "duration": 38.07140473807141,
+                "end_time": 38.07140473807141,
+                "meta_data": {
+                    "audio_codec": "aac",
+                    "codec": "h264",
+                    "duration": 38.11,
+                    "ffmpeg_version": "4.2.2 built with Apple clang version 11.0.0 (clang-1100.0.33.8)",
+                    "fps": 29.97,
+                    "nframes": Infinity,
+                    "pix_fmt": "yuv420p",
+                    "plugin": "ffmpeg",
+                    "rotate": 0,
+                    "size": [
+                        204,
+                        360
+                    ],
+                    "source_size": [
+                        204,
+                        360
+                    ]
+                },
+                "name": "wzk_vlog_beat_enhance1_track1238_360",
+                "num_frames_total": 1141,
+                "path": "./VisBeatAssets/VideoSources/wzk_vlog_beat_enhance1_track1238/Versions/Original/maxheight_360/wzk_vlog_beat_enhance1_track1238.mp4",
+                "sampling_rate": 29.97,
+                "start_time": 0
+            },
+            "Full": {
+                "duration": 34.83483483483484,
+                "end_time": 34.83483483483484,
+                "meta_data": {
+                    "audio_codec": "aac",
+                    "codec": "h264",
+                    "duration": 38.08,
+                    "ffmpeg_version": "4.2.2 built with Apple clang version 11.0.0 (clang-1100.0.33.8)",
+                    "fps": 29.97,
+                    "nframes": Infinity,
+                    "pix_fmt": "yuv420p(tv",
+                    "plugin": "ffmpeg",
+                    "rotate": 0,
+                    "size": [
+                        544,
+                        960
+                    ],
+                    "source_size": [
+                        544,
+                        960
+                    ]
+                },
+                "name": "wzk_vlog_beat_enhance1_track1238_Full",
+                "num_frames_total": 1044,
+                "path": "./VisBeatAssets/VideoSources/wzk_vlog_beat_enhance1_track1238/Versions/Source/Full/wzk_vlog_beat_enhance1_track1238.mp4",
+                "sampling_rate": 29.97,
+                "start_time": 0
+            }
+        }
+    },
+    "video_file_name": "wzk_vlog_beat_enhance1_track1238.mp4"
+}

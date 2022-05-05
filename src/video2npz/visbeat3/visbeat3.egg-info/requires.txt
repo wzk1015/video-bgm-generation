@@ -1,0 +1,10 @@
+numpy
+scipy
+bs4
+librosa
+imageio
+requests
+moviepy
+termcolor
+youtube-dl
+matplotlib
