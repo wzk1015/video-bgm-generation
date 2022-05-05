@@ -13,8 +13,6 @@ sys.path.append("../dataset/")
 from numpy2midi_mix import numpy2midi
 from model import CMT
 
-num_songs = 10
-
 
 def cal_control_error(err_note_number_list, err_beat_number_list):
     print("err_note_number_list", err_note_number_list)
@@ -29,7 +27,10 @@ def generate():
     parser.add_argument('-c', '--ckpt', default="../exp/loss_8_params.pt", help="Model checkpoint to be loaded")
     parser.add_argument('-f', '--files', required=True, help="Input npz file of a video")
     parser.add_argument('-g', '--gpus', help="Id of gpu. Only ONE gpu is needed")
+    parser.add_argument('-n', '--num_songs', default=1, help="Number of generated songs")
     args = parser.parse_args()
+    
+    num_songs = int(args.num_songs)
 
     if args.gpus is not None:
         if not args.gpus.isnumeric():
