@@ -1,5 +1,3 @@
-echo "Note: you should use a **Python2** environment"
-
 # extract flow magnitude into optical_flow/flow.npz
 python optical_flow.py --video $1
 

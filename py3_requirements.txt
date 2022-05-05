@@ -9,5 +9,13 @@ torch
 pytorch-fast-transformers
 opencv-python==4.5.3.56
 scikit-video==1.1.11
-tqdm
 pypianoroll
+scipy
+bs4
+librosa==0.6.0
+imageio==2.9.0
+requests
+moviepy==1.0.3
+termcolor
+youtube-dl
+numba==0.48.0
