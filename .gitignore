@@ -2,7 +2,7 @@
 /exp/*/
 /inference/*.npz
 /inference/*.mid
-!/inference/wzk.npz
+#!/inference/wzk.npz
 /src_no_pos/
 /src/*.jpg
 /src/*.npz
@@ -25,3 +25,4 @@ __pycache__/
 *.m4a
 *.pyc
 cookies.txt
+metadata.json

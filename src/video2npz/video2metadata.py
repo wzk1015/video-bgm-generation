@@ -3,7 +3,7 @@
 import matplotlib
 
 matplotlib.use('Agg')
-import visbeat as vb
+import visbeat3 as vb
 import os
 import os.path as osp
 import cv2
@@ -124,10 +124,10 @@ def process_video(video_path, args):
 
 
 if __name__ == '__main__':
-    vb.SetAssetsDir('.' + os.sep + 'VisBeatAssets' + os.sep)
+    # vb.SetAssetsDir('.' + os.sep + 'VisBeatAssets' + os.sep)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--video', type=str, default='../../videos/wzk.mp4')
+    parser.add_argument('--video', type=str, default='../../videos/final_640.mp4')
     parser.add_argument('--visualize', action='store_true', default=True)
     parser.add_argument('--resolution', type=int, default=1)
     args = parser.parse_args()

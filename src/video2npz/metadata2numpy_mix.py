@@ -85,7 +85,7 @@ def metadata2numpy(metadata):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--out_dir', default="../../inference/")
-    parser.add_argument('--video', default="wzk.mp4")
+    parser.add_argument('--video', default="final_640.mp4")
     parser.add_argument('--metadata', default="metadata.json")
     args = parser.parse_args()
 
