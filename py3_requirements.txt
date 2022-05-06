@@ -6,7 +6,7 @@ miditoolkit==0.1.15
 muspy==0.4.0
 scikit_learn==1.0
 torch
-pytorch-fast-transformers
+pytorch-fast-transformers==0.3.0
 opencv-python==4.5.3.56
 scikit-video==1.1.11
 pypianoroll
@@ -16,9 +16,9 @@ librosa==0.6.0
 imageio==2.9.0
 requests
 moviepy==1.0.3
-termcolor
+termcolor==1.1.0
 youtube-dl==2021.12.17
 numba==0.48.0
 pretty_midi
-pyfluidsynth
+pyfluidsynth==1.2.5
 note_seq
