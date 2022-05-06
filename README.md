@@ -191,4 +191,4 @@ python src/match.py inference/test.npz dataset/lpd_5_prcem_mix_v8_10000.npz
 
 Our code is based on [Compound Word Transformer](https://github.com/YatingMusic/compound-word-transformer).
 
-`src/visbeat3` is a debugged version of [haofanwang/visbeat3](https://github.com/haofanwang/visbeat3), which is a migration of [visbeat](http://abedavis.com/visualbeat/) from Python2 to Python3.
+`src/video2npz/visbeat3` is a debugged version of [haofanwang/visbeat3](https://github.com/haofanwang/visbeat3), which is a migration of [visbeat](http://abedavis.com/visualbeat/) from Python2 to Python3.
