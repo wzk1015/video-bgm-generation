@@ -17,7 +17,7 @@ imageio==2.9.0
 requests
 moviepy==1.0.3
 termcolor
-youtube-dl=2021.12.17
+youtube-dl==2021.12.17
 numba==0.48.0
 pretty_midi
 pyfluidsynth
