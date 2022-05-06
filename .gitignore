@@ -6,7 +6,7 @@
 /src_no_pos/
 /src/*.jpg
 /src/*.npz
-/src/midi2mp3.py
+!/src/midi2mp3.py
 /src/metadata.json
 /dataset/*.npz
 /dataset/json_*/
