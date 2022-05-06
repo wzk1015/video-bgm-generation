@@ -2,7 +2,7 @@
 
 Official code for our paper *Video Background Music Generation with Controllable Music Transformer* (ACM MM 2021 Best Paper Award) 
 
-[[Paper]](https://arxiv.org/abs/2111.08380) [[Project Page]](https://wzk1015.github.io/cmt/) [[Bibtex]](https://wzk1015.github.io/cmt/cmt.bib)[[Colab Demo]](https://colab.research.google.com/github/wzk1015/video-bgm-generation/blob/main/CMT.ipynb)
+[[Paper]](https://arxiv.org/abs/2111.08380) [[Project Page]](https://wzk1015.github.io/cmt/) [[Bibtex]](https://wzk1015.github.io/cmt/cmt.bib) [[Colab Demo]](https://colab.research.google.com/github/wzk1015/video-bgm-generation/blob/main/CMT.ipynb)
 
 
 
