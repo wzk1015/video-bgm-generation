@@ -2,10 +2,11 @@
 /exp/*/
 /inference/*.npz
 /inference/*.mid
-!/inference/wzk.npz
+#!/inference/wzk.npz
 /src_no_pos/
 /src/*.jpg
 /src/*.npz
+!/src/midi2mp3.py
 /src/metadata.json
 /dataset/*.npz
 /dataset/json_*/
@@ -22,6 +23,9 @@ __pycache__/
 .idea/
 /new/
 *.mp4
+*.mp3
 *.m4a
 *.pyc
 cookies.txt
+metadata.json
+*.sf2

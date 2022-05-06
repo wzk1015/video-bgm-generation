@@ -5,7 +5,7 @@ from midi2numpy_mix import Note, DECODER_DIMENSION, RESOLUTION
 from dictionary_mix import preset_event2word
 
 INSTRUMENT_PROGRAM = {
-    'Drums'  : 0,  # Acoustic Bass Drum?
+    'Drums'  : 114,
     'Piano'  : 0,  # Acoustic Grand Piano
     'Guitar' : 24,  # Acoustic Guitar (nylon)
     'Bass'   : 33,  # Electric Bass (finger)

@@ -1,9 +1,8 @@
 # from Video import *
-from Image import *
-from Event import *
-from VisualBeat import *
+from .Image import *
+from .Event import *
+from .VisualBeat import *
 import librosa
-import cv2 as ocv
 
 FEATURE_FUNCS = {};
 VIS_FUNCS = {};
@@ -150,7 +149,7 @@ if(USING_OPENCV):
         if(noise_floor_percentile is None):
             noise_floor_percentile = 20;
 
-        print("Computing Flow Features with deadzone {}".format(dead_zone))
+        print(("Computing Flow Features with deadzone {}".format(dead_zone)))
 
         signal_dim = 128;
         m_histvals = np.zeros([signal_dim, self.n_frames(), 3]);
@@ -159,8 +158,8 @@ if(USING_OPENCV):
         sampling_rate=self.sampling_rate;
         duration = self.getDuration();
         nsamples = sampling_rate*duration;
-
-        frame_start_times = np.linspace(0,duration,num=nsamples,endpoint=False);
+        # print(sampling_rate, duration)
+        frame_start_times = np.linspace(0,duration,num=int(nsamples),endpoint=False);
         frame_index_floats = frame_start_times*self.sampling_rate;
 
         lastframe = self.cvGetGrayFrame(frame_index_floats[0]);
@@ -170,14 +169,11 @@ if(USING_OPENCV):
         fcounter=0;
         counter = 0;
 
-        flow_magnitude_list = []
         for nf in range(len(frame_index_floats)):
             nextframe= self.cvGetGrayFrame(frame_index_floats[nf]);
             flow = cvDenseFlowFarneback(from_image=lastframe, to_image=nextframe);
             h, w = flow.shape[:2];
             fx, fy = flow[:,:,0], flow[:,:,1];
-
-            flow_magnitude_list.append(np.mean(np.abs(flow)))
 
             # if(filter_median):
             #     fx = fx-np.median(fx.ravel());
@@ -213,15 +209,14 @@ if(USING_OPENCV):
             if(not (fcounter%50)):
                 if((time.time()-last_timer)>10):
                     last_timer=time.time();
-                    print("{}%% done after {} seconds...".format(100.0*truediv(fcounter,len(frame_index_floats)), last_timer-start_timer));
+                    print(("{}%% done after {} seconds...".format(100.0*truediv(fcounter,len(frame_index_floats)), last_timer-start_timer)));
         params = dict( bins = bins,
                         deadzone=dead_zone,
                         density=density);
         params.update(kwargs);
         self.setFeature(name='directogram_powers', value=m_histvals, params=params);
-        self.setFeature(name='flow_magnitude', value=np.array(flow_magnitude_list))
         if(save_if_computed):
-            self.save(features_to_save=['directogram_powers', 'flow_magnitude'])
+            self.save(features_to_save=['directogram_powers']);
         return m_histvals;
 
     ######################### Other Features #############################
@@ -246,6 +241,8 @@ if(USING_OPENCV):
         feature_name = 'visual_tempo';
         if ((not self.hasFeature(feature_name)) or force_recompute):
             vbe = self.getFeature('local_rhythmic_saliency');
+            # assert librosa.__version__ == '0.7.1'
+            # result = librosa.beat.beat_track(onset_envelope=vbe, sr=self.sampling_rate, hop_length=1, **kwargs);
             result = librosa.beat.beat_track(onset_envelope=vbe, sr=self.sampling_rate, hop_length=1, **kwargs);
             self.setFeature(name=feature_name, value=result, params=kwargs);
         return self.getFeature(feature_name);
@@ -420,7 +417,7 @@ if(USING_OPENCV):
             ei = int(round(b.start*self.sampling_rate*VB_UPSAMPLE_FACTOR));
             b.weight = svbe[ei];
 
-            histsize = 128/int(np.power(2,HISTOGRAM_DOWNSAMPLE_LEVELS))
+            histsize = int(128/int(np.power(2,HISTOGRAM_DOWNSAMPLE_LEVELS)))
             histslice = np.zeros([histsize, HISTOGRAM_FRAMES_PER_BEAT]);
             histslice = np.squeeze(np.mean(histslice, 1));
             b.flow_histogram = downsample_hist(sig=histslice, levels=HISTOGRAM_DOWNSAMPLE_LEVELS);
@@ -591,7 +588,7 @@ if(USING_OPENCV):
         upsample_factor = kwargs.get('upsample_factor');
 
         powers = self.getFeature('directogram_powers');
-        print("computing impact env with power {}".format(power));
+        print(("computing impact env with power {}".format(power)));
         im = powers[:,:,power].copy();
 
         if (f_sigma is not None):
@@ -716,7 +713,7 @@ if(USING_OPENCV):
             if(len(sequences[0])<=target_n_beats):
                 deltapick = delta;
                 break;
-        print("Selected delta value {}".format(deltapick));
+        print(("Selected delta value {}".format(deltapick)));
         return sequences;
 
 
@@ -795,9 +792,9 @@ if(USING_OPENCV):
             if(n_return is not None):
                 r_sequences = r_sequences[:n_return];
         if(print_summary):
-            print("{} segments".format(len(r_sequences)));
+            print(("{} segments".format(len(r_sequences))));
             for s in range(len(r_sequences)):
-                print("Segment {} has {} beats".format(s, len(r_sequences[s])));
+                print(("Segment {} has {} beats".format(s, len(r_sequences[s]))));
 
         return r_sequences;
 
@@ -847,8 +844,8 @@ if(USING_OPENCV):
             time_range=time_range);
 
         seqs = self.getVisualBeatSequences(**sequence_args)
-        print("sequence arguments were:\n{}".format(sequence_args));
-        print("There were {} sequences total".format(len(seqs)));
+        print(("sequence arguments were:\n{}".format(sequence_args)));
+        print(("There were {} sequences total".format(len(seqs))));
         nclips = 0;
         rsegments = [];
         for S in seqs:
@@ -859,68 +856,8 @@ if(USING_OPENCV):
         # rsegments.sort(key=len, reverse=True);
         # if (n_return is not None):
         #     rsegments = rsegments[:n_return];
-        plt.rcParams.update({'font.size': 16})
 
-        if kwargs.get('figsize') is not None:
-            plt.figure(figsize=kwargs.get('figsize'), dpi=200)
-        else:
-            plt.figure(figsize=(50, 20))
-        plt.subplots_adjust(bottom=0.15)
-
-        # import pdb;pdb.set_trace()
-
-        # selet the top 100% visbeats based on weight
-        events = rsegments[0]
-        events.sort(key=lambda x:x.weight, reverse=True)
-        events = events[:int(1.0 * len(events))]
-        Event.PlotSignalAndEvents(self.getFeature('impact_envelope'),  sampling_rate=self.sampling_rate*VB_UPSAMPLE_FACTOR, events=events,  time_range=time_range);
-        # Event.PlotSignalAndEvents(self.getFeature('impact_envelope'),  sampling_rate=self.sampling_rate*VB_UPSAMPLE_FACTOR, events=rsegments[0],  time_range=time_range);
-
-        if kwargs.get('xrange'):
-            plt.xlim(kwargs.get('xrange'))
-
-        if kwargs.get('x_major_locator'):
-            ax = plt.gca()
-            ax.xaxis.set_major_locator(kwargs.get('x_major_locator'))
-
-            class GridShader():
-                def __init__(self, ax, first=True, **kwargs):
-                    self.spans = []
-                    self.sf = first
-                    self.ax = ax
-                    self.kw = kwargs
-                    self.ax.autoscale(False, axis="x")
-                    self.cid = self.ax.callbacks.connect('xlim_changed', self.shade)
-                    self.shade()
-                def clear(self):
-                    for span in self.spans:
-                        try:
-                            span.remove()
-                        except:
-                            pass
-                def shade(self, evt=None):
-                    self.clear()
-                    xticks = self.ax.get_xticks()
-                    xlim = self.ax.get_xlim()
-                    xticks = xticks[(xticks > xlim[0]) & (xticks < xlim[-1])]
-                    locs = np.concatenate(([[xlim[0]], xticks, [xlim[-1]]]))
-
-                    start = locs[1-int(self.sf)::2]  
-                    end = locs[2-int(self.sf)::2]
-
-                    for s, e in zip(start, end):
-                        self.spans.append(self.ax.axvspan(s, e, zorder=0, **self.kw))
-
-            gs = GridShader(ax, facecolor="lightgrey", first=False, alpha=0.7)
-
-        if kwargs.get('save_path'):
-            plt.xlabel('Time (s)')
-            plt.ylabel('Motion Saliency')
-            # plt.legend(loc = "upper left")
-            plt.legend(loc = "best")
-            # plt.legend(loc = "upper mid")
-            plt.savefig(kwargs.get('save_path'), format=kwargs.get('save_path')[-3:], transparent = False)
-            plt.savefig(kwargs.get('save_path').replace('.eps', '.png'), transparent = False)
+        Event.PlotSignalAndEvents(self.getFeature('impact_envelope'),  sampling_rate=self.sampling_rate*VB_UPSAMPLE_FACTOR, events=rsegments[0],  time_range=time_range);
         return rsegments;
 
     def plotEvents(self, events, time_range = 'default', **kwargs):
@@ -957,13 +894,6 @@ if(USING_OPENCV):
         plt.xlabel('Time (s)')
         plt.ylabel('Impact Strength')
 
-    def plotFlowMagnitude(self, **kargs):
-        signal = self.getFeature('flow_magnitude')
-        Event.PlotSignalAndEvents(signal, sampling_rate=self.sampling_rate*VB_UPSAMPLE_FACTOR, events=None, **kargs)
-        plt.title('Optical Flow Magnitude')
-        plt.xlabel('Time (s)')
-        plt.ylabel('Optical Flow Magnitude')
-
     def plotVisualBeats(self, **kwargs):
         signal = self.getFeature('local_rhythmic_saliency');
         events = self.getFeature('visual_beats', **kwargs);
@@ -991,4 +921,5 @@ if(USING_OPENCV):
     FEATURE_FUNCS['directional_flux'] = getDirectionalFlux;
     FEATURE_FUNCS['visual_tempogram'] = getVisualTempogram;
     FEATURE_FUNCS['cut_events']=getCutEvents;
+
 
