@@ -23,7 +23,9 @@ __pycache__/
 .idea/
 /new/
 *.mp4
+*.mp3
 *.m4a
 *.pyc
 cookies.txt
 metadata.json
+*.sf2

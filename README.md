@@ -2,7 +2,13 @@
 
 Official code for our paper *Video Background Music Generation with Controllable Music Transformer* (ACM MM 2021 Best Paper Award) 
 
-[[Paper]](https://arxiv.org/abs/2111.08380) [[Demos]](https://wzk1015.github.io/cmt/) [[Bibtex]](https://wzk1015.github.io/cmt/cmt.bib)
+[[Paper]](https://arxiv.org/abs/2111.08380) [[Project Page]](https://wzk1015.github.io/cmt/) [[Bibtex]](https://wzk1015.github.io/cmt/cmt.bib)[[Colab Demo]](https://colab.research.google.com/github/wzk1015/video-bgm-generation/blob/main/CMT.ipynb)
+
+
+
+## News
+
+[2022.5] **We provide a [colab notebook](https://colab.research.google.com/github/wzk1015/video-bgm-generation/blob/main/CMT.ipynb) for demo!** You can run inference code and generate a background music for your input video.
 
 
 
@@ -21,73 +27,63 @@ We address the unexplored task – *video background music generation*. We first
   * `model.py`: code of the model
   * `gen_midi_conditional.py`: inference script, take a npz (represents a video) as input to generate several songs
   
-  * `src/video2npz/`: convert video into npz by extracting motion saliency and motion speed
+  * `midi2mp3.py`: script of converting midi into mp3
   
+  * `src/video2npz/`: convert video into npz by extracting motion saliency and motion speed
 * `dataset/`: processed dataset for training, in the format of npz
-
 * `logs/`: logs that automatically generate during training, can be used to track training process
-
 * `exp/`: checkpoints, named after val loss (e.g. `loss_8_params.pt`)
-
 * `inference/`: processed video for inference (.npz), and generated music(.mid) 
+
+
 
 
 ## Preparation
 
-* clone this repo
-* download the processed data `lpd_5_prcem_mix_v8_10000.npz`  from [HERE](https://drive.google.com/file/d/1MWnwwAdOrjC31dSy8kfyxHwv35wK0pQh/view?usp=sharing) and put it under `dataset/` 
+* Clone this repo
 
-* download the pretrained model `loss_8_params.pt` from [HERE](https://drive.google.com/file/d/1Ud2-GXEr4PbRDDe-FZJwzqqZrbbWFxM-/view?usp=sharing) and put it under `exp/` 
+* Download the processed training data `lpd_5_prcem_mix_v8_10000.npz`  from [HERE](https://drive.google.com/file/d/1MWnwwAdOrjC31dSy8kfyxHwv35wK0pQh/view?usp=sharing) and put it under `dataset/` 
 
-* install `ffmpeg=3.2.4` 
+* Download the pretrained model `loss_8_params.pt` from [HERE](https://drive.google.com/file/d/1Ud2-GXEr4PbRDDe-FZJwzqqZrbbWFxM-/view?usp=sharing) and put it under `exp/` 
 
-* prepare a Python3 conda environment
+* Install `ffmpeg=3.2.4` 
 
-  * ```shell
-    conda create -n mm21_py3 python=3.7
-    conda activate mm21_py3
-    pip install -r py3_requirements.txt
-    ```
-  * choose the correct version of `torch` and `pytorch-fast-transformers` based on your CUDA version (see [fast-trainsformers repo](https://github.com/idiap/fast-transformers) and [this issue](https://github.com/wzk1015/video-bgm-generation/issues/3))
+* Install Python3 dependencies `pip install -r py3_requirements.txt`
+
+  * Choose the correct version of `torch` and `pytorch-fast-transformers` based on your CUDA version (see [fast-trainsformers repo](https://github.com/idiap/fast-transformers) and [this issue](https://github.com/wzk1015/video-bgm-generation/issues/3))
+
+* (Optional) If you want to convert midi into mp3 with midi2audio:
+
+  * Install fluidsynth following [this](https://github.com/FluidSynth/fluidsynth/wiki/Download)
+  * Download soundfont `SGM-v2.01-Sal-Guit-Bass-V1.3.sf2` from [HERE](https://drive.google.com/file/d/1zDg0P-0rCXDl_wX4zeLcKRNmOFobq6u8/view?usp=sharing) and put it directly under this folder (`video-bgm-generation`)
 
   
-* prepare a Python2 conda environment (for extracting visbeat)
-
-  * ````shell
-    conda create -n mm21_py2 python=2.7
-    conda activate mm21_py2
-    pip install -r py2_requirements.txt
-    ````
-    
-  * open `visbeat` package directory (e.g. `anaconda3/envs/XXXX/lib/python2.7/site-packages/visbeat`), replace the original `Video_CV.py` with `src/video2npz/Video_CV.py`
 
 ## Training
 
-**Note:** use the `mm21_py3` environment: `conda activate mm21_py3`
-
-- A quick start using the processed data `lpd_5_prcem_mix_v8_10000.npz` (1~2 days on 8x 1080Ti GPUs):
+- A quick start by using the processed data `lpd_5_prcem_mix_v8_10000.npz` (1~2 days on 8x 1080Ti GPUs):
 
   ```shell
   python train.py --name train_default -b 8 --gpus 0 1 2 3 4 5 6 7
   ```
 
-* If you want to reproduce the whole process:
+* (Optional) If you want to reproduce the whole process:
 
-  1. download the lpd-5-cleansed dataset from [HERE](https://drive.google.com/uc?id=1yz0Ma-6cWTl6mhkrLnAVJ7RNzlQRypQ5) and put the extracted files under `dataset/lpd_5_cleansed/`
+  1. Download the lpd-5-cleansed dataset from [HERE](https://drive.google.com/uc?id=1yz0Ma-6cWTl6mhkrLnAVJ7RNzlQRypQ5) and put the extracted files under `dataset/lpd_5_cleansed/`
 
-  2. go to `src/` and convert the pianoroll files (.npz) to midi files (~3 files / sec):
+  2. Go to `src/` and convert the pianoroll files (.npz) to midi files (~3 files / sec):
 
      ```shell
      python pianoroll2midi.py --in_dir ../dataset/lpd_5_cleansed/ --out_dir ../dataset/lpd_5_cleansed_midi/
      ```
 
-  3. convert midi files to .npz files with our proposed representation (~5 files / sec):
+  3. Convert midi files to .npz files with our proposed representation (~5 files / sec):
 
        ```shell
        python midi2numpy_mix.py --midi_dir ../dataset/lpd_5_cleansed_midi/ --out_name data.npz 
        ```
 
-  4. train the model (1~2 days on 8x 1080Ti GPUs):
+  4. Train the model (1~2 days on 8x 1080Ti GPUs):
 
       ```shell
       python train.py --name train_exp --train_data ../dataset/data.npz -b 8 --gpus 0 1 2 3 4 5 6 7
@@ -97,53 +93,83 @@ We address the unexplored task – *video background music generation*. We first
 
 ```python
 import muspy
-
 midi = muspy.read_midi('xxx.mid')
 print([track.name for track in midi.tracks]) # Should be like ['Drums', 'Guitar', 'Bass', 'Strings']
 ```
 
+
+
 ## Inference
 
-* convert input video (MP4 format) into npz (use the `mm21_py2` environment):
+Inference requires one GPU. You can try our [colab notebook](https://colab.research.google.com/github/wzk1015/video-bgm-generation/blob/main/CMT.ipynb) to run inference.
+
+It is recommended to use videos *less than 2 minutes*, otherwise it gets really slow
+
+* Resize the video into 360p
 
   ```shell
-  conda activate mm21_py2
+  ffmpeg -i xxx.mp4 -strict -2 -vf scale=-1:360 test.mp4
+  ```
+
+* Convert input video (MP4 format) into npz
+
+  ```shell
   cd src/video2npz
-  # try resizing the video if this takes a long time
-  sh video2npz.sh ../../videos/xxx.mp4
+  sh video2npz.sh ../../videos/test.mp4
   ```
   
-* run model to generate `.mid` (use the `mm21_py3` environment) : 
+* Run model to generate `.mid` : 
 
   ```shell
   conda activate mm21_py3
-  python gen_midi_conditional.py -f "../inference/xxx.npz" -c "../exp/loss_8_params.pt"
+  python gen_midi_conditional.py -f "../inference/test.npz" -c "../exp/loss_8_params.pt" -n 5
   
-  # if using another training set, change `decoder_n_class` in `gen_midi_conditional` to the one in `train.py`
+  # If using another training set, change `decoder_n_class` in `gen_midi_conditional` to the one in `train.py`
   ```
-  
-* convert midi into audio: use GarageBand (recommended) or midi2audio 
 
-  * set tempo to the value of  `tempo` in `video2npz/metadata.json` (generated when running `video2npz.sh`)
+* Convert midi into audio
 
-* combine original video and audio into video with BGM:
+  * Get tempo of the music: 
+
+  * ```python
+     # metadata.json is generated when running `video2npz.sh`
+    with open("video2npz/metadata.json") as f:
+        tempo = json.load(f)['tempo']
+        print("tempo:", tempo)
+    ```
+  * (A) Use GarageBand to convert midi into audio
+
+    * this is **recommended** since their soundfonts are better, and no need to install fluidsynth and soundfonts
+    * remember to set tempo
+
+  * (B) Use midi2audio
+
+    ```shell
+    # Make sure you have installed fluidsynth and downloaded soundfont
+    python midi2mp3.py --input ../inference/get_0.mid --output ../inference/get_0.mp3
+    ```
+
+* Combine original video and audio into video with BGM:
 
   ````shell
-  ffmpeg -i 'xxx.mp4' -i 'yyy.mp3' -c:v copy -c:a aac -strict experimental -map 0:v:0 -map 1:a:0 'zzz.mp4'
+  ffmpeg -i test.mp4 -i get_0.mp3 -c:v copy -c:a aac -strict experimental -map 0:v:0 -map 1:a:0 output.mp4
   
-  # xxx.mp4: input video
-  # yyy.mp3: audio file generated in the previous step
-  # zzz.mp4: output video
+  # test.mp4: input video
+  # get_0.mp3: audio file generated in the previous step
+  # output.mp4: output video with BGM
   ````
+
+
 
 ## Matching Method
 
-- The matching method finds the five most matching music pieces from the music library for a given video (use the `mm21_py3` environment).
+The matching method finds the five most matching music pieces from the music library for a given video.
 
-  ```shell
-  conda activate mm21_py3
-  python src/match.py inference/xxx.npz dataset/lpd_5_prcem_mix_v8_10000.npz
-  ```
+```shell
+python src/match.py inference/test.npz dataset/lpd_5_prcem_mix_v8_10000.npz
+```
+
+
 
 ## Citation
 
@@ -157,17 +183,10 @@ print([track.name for track in midi.tracks]) # Should be like ['Drums', 'Guitar'
 }
 ```
 
+
+
 ## Acknowledgements
 
 Our code is based on [Compound Word Transformer](https://github.com/YatingMusic/compound-word-transformer).
 
-
-
-
-
-
-
-
-
-
-
+`src/visbeat3` is a debugged version of [haofanwang/visbeat3](https://github.com/haofanwang/visbeat3), which is a migration of [visbeat](http://abedavis.com/visualbeat/) from Python2 to Python3.

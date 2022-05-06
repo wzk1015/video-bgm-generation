@@ -19,3 +19,6 @@ moviepy==1.0.3
 termcolor
 youtube-dl
 numba==0.48.0
+pretty_midi
+pyfluidsynth
+note_seq
