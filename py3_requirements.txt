@@ -1,4 +1,7 @@
 tqdm
+urllib3==1.26.9
+six==1.16.0
+threadpoolctl==2.1.0
 h5py==2.10.0
 matplotlib==3.3.4
 numpy
