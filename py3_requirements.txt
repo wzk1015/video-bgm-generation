@@ -9,13 +9,13 @@ miditoolkit==0.1.15
 muspy==0.4.0
 scikit_learn==1.0
 torch==1.9.0
-pytorch-fast-transformers==0.3.0
+pytorch-fast-transformers==0.4.0
 opencv-python==4.5.3.56
 scikit-video==1.1.11
 pypianoroll
 scipy
 bs4
-librosa==0.6.0
+librosa==0.6.2
 imageio==2.9.0
 requests
 moviepy==1.0.3
@@ -25,3 +25,4 @@ numba==0.48.0
 pretty_midi
 pyfluidsynth==1.2.5
 note_seq
+midi2audio
