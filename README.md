@@ -50,7 +50,7 @@ We address the unexplored task – *video background music generation*. We first
 
 * Install Python3 dependencies `pip install -r py3_requirements.txt`
 
-  * Choose the correct version of `torch` and `pytorch-fast-transformers` based on your CUDA version (see [fast-trainsformers repo](https://github.com/idiap/fast-transformers) and [this issue](https://github.com/wzk1015/video-bgm-generation/issues/3))
+  * Choose the correct version of `torch` and `pytorch-fast-transformers` based on your CUDA version (see [fast-transformers repo](https://github.com/idiap/fast-transformers) and [this issue](https://github.com/wzk1015/video-bgm-generation/issues/3))
 
 * Install `visbeat3` package: `cd src/video2npz/visbeat3; python setup.py install`
 
