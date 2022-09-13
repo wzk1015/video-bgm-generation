@@ -42,7 +42,7 @@ We address the unexplored task – *video background music generation*. We first
 
 * Clone this repo
 
-* Download the processed training data `lpd_5_prcem_mix_v8_10000.npz`  from [HERE](https://drive.google.com/file/d/1MWnwwAdOrjC31dSy8kfyxHwv35wK0pQh/view?usp=sharing) and put it under `dataset/` 
+* Download the processed training data `lpd_5_prcem_mix_v8_10000.npz`  from [HERE](https://drive.google.com/file/d/19f_DytIbEiSDCwz8FPpScrHqmnqNtVYT/view?usp=sharing) and put it under `dataset/` 
 
 * Download the pretrained model `loss_8_params.pt` from [HERE](https://drive.google.com/file/d/1Ud2-GXEr4PbRDDe-FZJwzqqZrbbWFxM-/view?usp=sharing) and put it under `exp/` 
 
