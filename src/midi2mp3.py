@@ -17,7 +17,7 @@ def midi_to_mp3(midi_path, tempo, mp3_path):
 
     print("converting into mp3")
     fs = midi2audio.FluidSynth(SF2_PATH, sample_rate=SAMPLE_RATE)
-    fs.midi_to_audio(midi_path, mp3_path)
+    fs.midi_to_audio(processed_mid, mp3_path)
     
     print("playing music")
     
