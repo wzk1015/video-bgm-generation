@@ -231,5 +231,11 @@ if __name__ == '__main__':
     npz_filename = os.path.join("../dataset/", args.out_name)
     json_dir = os.path.join("../dataset/json/")
 
-    id_list = [name.strip(".mid").strip(".midi") for name in os.listdir(midi_dir) if ".mid" in name]
+    id_list = []
+    for name in os.listdir(midi_dir):
+        if name.endswith(".mid"):
+            id_list.append(name[:-4])
+        elif name.endswith(".midi"):
+            id_list.append(name[:-5])
+    
     midi2numpy(id_list)
