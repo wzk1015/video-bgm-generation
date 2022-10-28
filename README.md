@@ -123,7 +123,6 @@ It is recommended to use videos *less than 2 minutes*, otherwise it gets really 
 * Run model to generate `.mid` : 
 
   ```shell
-  conda activate mm21_py3
   python gen_midi_conditional.py -f "../inference/test.npz" -c "../exp/loss_8_params.pt" -n 5
   
   # If using another training set, change `decoder_n_class` in `gen_midi_conditional` to the one in `train.py`
