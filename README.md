@@ -8,6 +8,8 @@ Official code for our paper *Video Background Music Generation with Controllable
 
 ## News
 
+[2023.9] **Check out our new [ICCV23 paper](https://arxiv.org/abs/2211.11248) for video background music generation.** We provide a video and symbolic music dataset with rich annotations, an objective metric for video-music correspondence, and a benchmark model that utilizes music priors of chords, melody, and accompaniment along with video-music relations of semantic, color, and motion features.
+
 [2022.5] **We provide a [colab notebook](https://colab.research.google.com/github/wzk1015/video-bgm-generation/blob/main/CMT.ipynb) for demo!** You can run inference code and generate a background music for your input video.
 
 
