@@ -4,7 +4,7 @@ six==1.16.0
 threadpoolctl==2.1.0
 h5py==2.10.0
 matplotlib==3.3.4
-numpy
+numpy==1.23.1
 miditoolkit==0.1.15
 muspy==0.4.0
 scikit_learn==1.0
