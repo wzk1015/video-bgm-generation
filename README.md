@@ -46,7 +46,7 @@ We address the unexplored task – *video background music generation*. We first
 
 * Download the processed training data `lpd_5_prcem_mix_v8_10000.npz`  from [HERE](https://drive.google.com/file/d/19f_DytIbEiSDCwz8FPpScrHqmnqNtVYT/view?usp=sharing) and put it under `dataset/` 
 
-* Download the pretrained model `loss_8_params.pt` from [HERE](https://drive.google.com/file/d/1Ud2-GXEr4PbRDDe-FZJwzqqZrbbWFxM-/view?usp=sharing) and put it under `exp/` 
+* Download the pretrained model `loss_8_params.pt` from [HERE](https://drive.google.com/file/d/1KvIRRm0KqTlEFDjAgs4fMtLRQBq0rBWy/view?usp=sharing) and put it under `exp/` 
 
 * Install `ffmpeg=3.2.4` 
 
@@ -73,7 +73,7 @@ We address the unexplored task – *video background music generation*. We first
 
 * (Optional) If you want to reproduce the whole process:
 
-  1. Download the lpd-5-cleansed dataset from [HERE](https://drive.google.com/uc?id=1yz0Ma-6cWTl6mhkrLnAVJ7RNzlQRypQ5) and put the extracted files under `dataset/lpd_5_cleansed/`
+  1. Download the lpd-5-cleansed dataset from [HERE](https://ucsdcloud-my.sharepoint.com/personal/h3dong_ucsd_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fh3dong%5Fucsd%5Fedu%2FDocuments%2Fdata%2Flpd%2Flpd%5F5%2Flpd%5F5%5Fcleansed%2Etar%2Egz&parent=%2Fpersonal%2Fh3dong%5Fucsd%5Fedu%2FDocuments%2Fdata%2Flpd%2Flpd%5F5&ga=1) and put the extracted files under `dataset/lpd_5_cleansed/`
 
   2. Go to `src/` and convert the pianoroll files (.npz) to midi files (~3 files / sec):
 
