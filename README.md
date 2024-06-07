@@ -10,13 +10,13 @@ Official code for our paper *Video Background Music Generation with Controllable
 
 [2023.9] **Check out our new [ICCV23 paper](https://arxiv.org/abs/2211.11248) for video background music generation.** We provide a video and symbolic music dataset with rich annotations, an objective metric for video-music correspondence, and a benchmark model that utilizes music priors of chords, melody, and accompaniment along with video-music relations of semantic, color, and motion features.
 
-[2022.5] **We provide a [colab notebook](https://colab.research.google.com/github/wzk1015/video-bgm-generation/blob/main/CMT.ipynb) for demo!** You can run inference code and generate a background music for your input video.
+[2022.5] **We provide a [colab notebook](https://colab.research.google.com/github/wzk1015/video-bgm-generation/blob/main/CMT.ipynb) for demo!** You can run inference code and generate background music for your input video.
 
 
 
 ## Introduction
 
-We address the unexplored task – *video background music generation*. We first establish three rhythmic relations between video and background music. We then propose a **C**ontrollable **M**usic **T**ransformer (CMT) to achieve local and global control of the music generation process. Our proposed method does not require paired video and music data for training while generates melodious and compatible music with the given video. 
+We address the unexplored task – *video background music generation*. We first establish three rhythmic relations between video and background music. We then propose a **C**ontrollable **M**usic **T**ransformer (CMT) to achieve local and global control of the music generation process. Our proposed method does not require paired video and music data for training while generating melodious and compatible music with the given video. 
 
 ![](https://raw.githubusercontent.com/wzk1015/wzk1015.github.io/master/cmt/img/head.png)
 
@@ -25,15 +25,15 @@ We address the unexplored task – *video background music generation*. We first
 ## Directory Structure
 
 * `src/`: code of the whole pipeline
-  * `train.py`: training script, take a npz as input music data to train the model 
+  * `train.py`: training script, take an npz file as input music data to train the model 
   * `model.py`: code of the model
-  * `gen_midi_conditional.py`: inference script, take a npz (represents a video) as input to generate several songs
+  * `gen_midi_conditional.py`: inference script, take an npz file (represents a video) as input to generate several songs
   
   * `midi2mp3.py`: script of converting midi into mp3
   
   * `src/video2npz/`: convert video into npz by extracting motion saliency and motion speed
 * `dataset/`: processed dataset for training, in the format of npz
-* `logs/`: logs that automatically generate during training, can be used to track training process
+* `logs/`: logs that automatically generated during training, can be used to track the training process
 * `exp/`: checkpoints, named after val loss (e.g. `loss_8_params.pt`)
 * `inference/`: processed video for inference (.npz), and generated music(.mid) 
 
@@ -46,7 +46,7 @@ We address the unexplored task – *video background music generation*. We first
 
 * Download the processed training data `lpd_5_prcem_mix_v8_10000.npz`  from [HERE](https://drive.google.com/file/d/19f_DytIbEiSDCwz8FPpScrHqmnqNtVYT/view?usp=sharing) and put it under `dataset/` 
 
-* Download the pretrained model `loss_8_params.pt` from [HERE](https://drive.google.com/file/d/1KvIRRm0KqTlEFDjAgs4fMtLRQBq0rBWy/view?usp=sharing) and put it under `exp/` 
+* Download the pre-trained model `loss_8_params.pt` from [HERE](https://drive.google.com/file/d/1KvIRRm0KqTlEFDjAgs4fMtLRQBq0rBWy/view?usp=sharing) and put it under `exp/` 
 
 * Install `ffmpeg=3.2.4` 
 
@@ -107,7 +107,7 @@ print([track.name for track in midi.tracks]) # Should be like ['Drums', 'Guitar'
 
 Inference requires one GPU. You can try our [colab notebook](https://colab.research.google.com/github/wzk1015/video-bgm-generation/blob/main/CMT.ipynb) to run inference.
 
-It is recommended to use videos *less than 2 minutes*, otherwise it gets really slow
+It is recommended to use videos *less than 2 minutes*, otherwise, it gets really slow
 
 * Resize the video into 360p
 
@@ -180,8 +180,7 @@ python src/match.py inference/test.npz dataset/lpd_5_prcem_mix_v8_10000.npz
 @inproceedings{di2021video,
   title={Video Background Music Generation with Controllable Music Transformer},
   author={Di, Shangzhe and Jiang, Zeren and Liu, Si and Wang, Zhaokai and Zhu, Leyan and He, Zexin and Liu, Hongming and Yan, Shuicheng},
-  booktitle={Proceedings of the 29th ACM International Conference on Multimedia},
-  pages={2037--2045},
+  booktitle={ACM Multimedia},
   year={2021}
 }
 ```
