@@ -73,7 +73,7 @@ We address the unexplored task – *video background music generation*. We first
 
 * (Optional) If you want to reproduce the whole process:
 
-  1. Download the lpd-5-cleansed dataset from [HERE](https://ucsdcloud-my.sharepoint.com/personal/h3dong_ucsd_edu/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fh3dong%5Fucsd%5Fedu%2FDocuments%2Fdata%2Flpd%2Flpd%5F5%2Flpd%5F5%5Fcleansed%2Etar%2Egz&parent=%2Fpersonal%2Fh3dong%5Fucsd%5Fedu%2FDocuments%2Fdata%2Flpd%2Flpd%5F5&ga=1) and put the extracted files under `dataset/lpd_5_cleansed/`
+  1. Download the lpd-5-cleansed dataset from [HERE](https://drive.google.com/file/d/1AzLZ4fHrcek1rVNlOC3pzxsMaNSITZsG/view?usp=sharing) and put the extracted files under `dataset/lpd_5_cleansed/`
 
   2. Go to `src/` and convert the pianoroll files (.npz) to midi files (~3 files / sec):
 
@@ -93,7 +93,7 @@ We address the unexplored task – *video background music generation*. We first
       python train.py --name train_exp --train_data ../dataset/data.npz -b 8 --gpus 0 1 2 3 4 5 6 7
       ```
 
-**Note:** If you want to train with another MIDI dataset, please ensure that each track belongs to one of the five instruments (Drums, Piano, Guitar, Bass, or Strings) and is named exactly with its instrument. You can check this with [Muspy](https://salu133445.github.io/muspy/):
+**Note:** If you want to train with another MIDI dataset, please ensure that each track belongs to one of the five instruments (Drums, Piano, Guitar, Bass, or Strings) and is named exactly with its instrument. Otherwise, you may have to change the track names in the MIDI files. You can check this with [Muspy](https://salu133445.github.io/muspy/):
 
 ```python
 import muspy
