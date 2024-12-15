@@ -2,17 +2,19 @@
 
 Official code for our paper *Video Background Music Generation with Controllable Music Transformer* (ACM MM 2021 Best Paper Award) 
 
-[[Paper]](https://arxiv.org/abs/2111.08380) [[Project Page]](https://wzk1015.github.io/cmt/) [[Bibtex]](https://wzk1015.github.io/cmt/cmt.bib) [[Colab Demo]](https://colab.research.google.com/github/wzk1015/video-bgm-generation/blob/main/CMT.ipynb)
+[[Paper]](https://arxiv.org/abs/2111.08380) [[Project Page]](https://wzk1015.github.io/cmt/) [[Colab Demo]](https://colab.research.google.com/github/wzk1015/video-bgm-generation/blob/main/CMT.ipynb)
 
 
 
 ## News
 
-[2023.9] **Check out our new [ICCV23 paper](https://arxiv.org/abs/2211.11248) for video background music generation.** We provide a video and symbolic music dataset with rich annotations, an objective metric for video-music correspondence, and a benchmark model that utilizes music priors of chords, melody, and accompaniment along with video-music relations of semantic, color, and motion features.
+[2024.12] 🚀🚀**Check out our new [paper](https://github.com/wbs2788/VMB/tree/main) for multimodal music generation!** We propose a novel mutlimodal music generation approach with explicit text and music bridges for video-to-music, image-to-music, text-to-music, and controllable music generation tasks.
+
+[2023.9] **Check out our new [ICCV 2023 paper](https://arxiv.org/abs/2211.11248) for video background music generation.** We provide a video and symbolic music dataset with rich annotations, an objective metric for video-music correspondence, and a benchmark model that utilizes music priors of chords, melody, and accompaniment along with video-music relations of semantic, color, and motion features.
 
 [2022.5] **We provide a [colab notebook](https://colab.research.google.com/github/wzk1015/video-bgm-generation/blob/main/CMT.ipynb) for demo!** You can run inference code and generate background music for your input video.
 
-
+[2021.10] We won the **ACM MM 2021 [Best Paper Award](https://www.wzk.plus/award_imgs/mm.jpg)**!
 
 ## Introduction
 
