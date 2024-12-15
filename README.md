@@ -8,13 +8,13 @@ Official code for our paper *Video Background Music Generation with Controllable
 
 ## News
 
-[2024.12] 🚀🚀**Check out our new [paper](https://github.com/wbs2788/VMB/tree/main) for multimodal music generation!** We propose a novel mutlimodal music generation approach with explicit text and music bridges for video-to-music, image-to-music, text-to-music, and controllable music generation tasks.
+[2024.12] 🚀🚀 **Check out our new [paper](https://github.com/wbs2788/VMB/tree/main) for multimodal music generation!** We propose a novel mutlimodal music generation approach with explicit text and music bridges for video-to-music, image-to-music, text-to-music, and controllable music generation tasks.
 
 [2023.9] **Check out our new [ICCV 2023 paper](https://arxiv.org/abs/2211.11248) for video background music generation.** We provide a video and symbolic music dataset with rich annotations, an objective metric for video-music correspondence, and a benchmark model that utilizes music priors of chords, melody, and accompaniment along with video-music relations of semantic, color, and motion features.
 
 [2022.5] **We provide a [colab notebook](https://colab.research.google.com/github/wzk1015/video-bgm-generation/blob/main/CMT.ipynb) for demo!** You can run inference code and generate background music for your input video.
 
-[2021.10] We won the **ACM MM 2021 [Best Paper Award](https://www.wzk.plus/award_imgs/mm.jpg)**!
+[2021.10] 🏆 We won the **ACM MM 2021 [Best Paper Award](https://www.wzk.plus/award_imgs/mm.jpg)**!
 
 ## Introduction
 
@@ -193,4 +193,4 @@ python src/match.py inference/test.npz dataset/lpd_5_prcem_mix_v8_10000.npz
 
 Our code is based on [Compound Word Transformer](https://github.com/YatingMusic/compound-word-transformer).
 
-`src/video2npz/visbeat3` is a debugged version of [haofanwang/visbeat3](https://github.com/haofanwang/visbeat3), which is a migration of [visbeat](http://abedavis.com/visualbeat/) from Python2 to Python3.
+`src/video2npz/visbeat3` is built upon [haofanwang/visbeat3](https://github.com/haofanwang/visbeat3) and the original [visbeat](http://abedavis.com/visualbeat/).
