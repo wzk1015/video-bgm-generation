@@ -1,6 +1,6 @@
 # Controllable Music Transformer
 
-Official code for our paper *Video Background Music Generation with Controllable Music Transformer* (ACM MM 2021 Best Paper Award) 
+Official code for our paper *Video Background Music Generation with Controllable Music Transformer* (ACM MM 2021 **Best Paper Award**) 
 
 [[Paper]](https://arxiv.org/abs/2111.08380) [[Project Page]](https://wzk1015.github.io/cmt/) [[Colab Demo]](https://colab.research.google.com/github/wzk1015/video-bgm-generation/blob/main/CMT.ipynb)
 
@@ -8,7 +8,9 @@ Official code for our paper *Video Background Music Generation with Controllable
 
 ## News
 
-[2024.12] 🚀🚀 **Check out our new [paper](https://github.com/wbs2788/VMB/tree/main) for multimodal music generation!** We propose a novel mutlimodal music generation approach with explicit text and music bridges for video-to-music, image-to-music, text-to-music, and controllable music generation tasks.
+[2025.3] **Take a look at our survey on vision-to-music generation ([Paper](https://arxiv.org/abs/2503.21254), [Repo](https://github.com/wzk1015/Awesome-Vision-to-Music-Generation))**, with latest methods, datasets and evaluation in video-to-music and image-to-music generation.
+
+[2024.12] 🚀🚀 **Check out our new [paper](https://github.com/wbs2788/VMB/tree/main) for multimodal music generation!** We propose a novel multimodal music generation approach with explicit text and music bridges for video-to-music, image-to-music, text-to-music, and controllable music generation tasks.
 
 [2023.9] **Check out our new [ICCV 2023 paper](https://arxiv.org/abs/2211.11248) for video background music generation.** We provide a video and symbolic music dataset with rich annotations, an objective metric for video-music correspondence, and a benchmark model that utilizes music priors of chords, melody, and accompaniment along with video-music relations of semantic, color, and motion features.
 
