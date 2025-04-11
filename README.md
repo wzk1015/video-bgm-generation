@@ -8,7 +8,7 @@ Official code for our paper *Video Background Music Generation with Controllable
 
 ## News
 
-[2025.3] **Take a look at our survey on vision-to-music generation ([Paper](https://arxiv.org/abs/2503.21254), [Repo](https://github.com/wzk1015/Awesome-Vision-to-Music-Generation))**, with latest methods, datasets and evaluation in video-to-music and image-to-music generation.
+[2025.3] **Take a look at our survey on vision-to-music generation ([Paper](https://arxiv.org/abs/2503.21254), [Repo](https://github.com/wzk1015/Awesome-Vision-to-Music-Generation))**, with the latest methods, datasets and evaluation in video-to-music and image-to-music generation.
 
 [2024.12] 🚀🚀 **Check out our new [paper](https://github.com/wbs2788/VMB/tree/main) for multimodal music generation!** We propose a novel multimodal music generation approach with explicit text and music bridges for video-to-music, image-to-music, text-to-music, and controllable music generation tasks.
 
