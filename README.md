@@ -8,7 +8,7 @@ Official code for our paper *Video Background Music Generation with Controllable
 
 ## News
 
-[2025.3] **Take a look at our survey on vision-to-music generation ([Paper](https://arxiv.org/abs/2503.21254), [Repo](https://github.com/wzk1015/Awesome-Vision-to-Music-Generation))**, with the latest methods, datasets and evaluation in video-to-music and image-to-music generation.
+[2025.3] **Take a look at our survey on vision-to-music generation, published in ISMIR 2025 ([Paper](https://arxiv.org/abs/2503.21254), [Repo](https://github.com/wzk1015/Awesome-Vision-to-Music-Generation))**, with the latest methods, datasets and evaluation in video-to-music and image-to-music generation.
 
 [2024.12] 🚀🚀 **Check out our new [paper](https://github.com/wbs2788/VMB/tree/main) for multimodal music generation!** We propose a novel multimodal music generation approach with explicit text and music bridges for video-to-music, image-to-music, text-to-music, and controllable music generation tasks.
 
@@ -186,6 +186,28 @@ python src/match.py inference/test.npz dataset/lpd_5_prcem_mix_v8_10000.npz
   author={Di, Shangzhe and Jiang, Zeren and Liu, Si and Wang, Zhaokai and Zhu, Leyan and He, Zexin and Liu, Hongming and Yan, Shuicheng},
   booktitle={ACM Multimedia},
   year={2021}
+}
+
+@inproceedings{zhuo2023video,
+  title={Video background music generation: Dataset, method and evaluation},
+  author={Zhuo, Le and Wang, Zhaokai and Wang, Baisen and Liao, Yue and Bao, Chenxi and Peng, Stanley and Han, Songhao and Zhang, Aixi and Fang, Fei and Liu, Si},
+  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision},
+  pages={15637--15647},
+  year={2023}
+}
+
+@article{vmb,
+  title={Multimodal Music Generation with Explicit Bridges and Retrieval Augmentation},
+  author={Wang, Baisen and Zhuo, Le and Wang, Zhaokai and Bao, Chenxi and Wu, Chengjing and Nie, Xuecheng and Dai, Jiao and Han, Jizhong and Liao, Yue and Liu, Si},
+  journal={arXiv preprint arXiv:2412.09428},
+  year={2024}
+}
+
+@inproceedings{wang2025vision,
+  title={Vision-to-Music Generation: A Survey},
+  author={Wang, Zhaokai and Bao, Chenxi and Zhuo, Le and Han, Jingrui and Yue, Yang and Tang, Yihong and Huang, Victor Shea-Jay and Liao, Yue},
+  booktitle={ISMIR},
+  year={2025}
 }
 ```
 
